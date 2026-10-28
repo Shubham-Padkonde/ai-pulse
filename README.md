@@ -40,6 +40,8 @@ All demo passwords are **pulse123**. These accounts are deliberately public fixt
 
 The login page fills example credentials when a demo perspective is selected. It does not sign in automatically.
 
+For a fresh recording fixture without changing the live configuration or database, run **python scripts/rehearse.py** after setup. It opens a separate synthetic workspace at **http://127.0.0.1:5174**, with exactly five completed Support employees. Each launch creates a new ignored database and always uses demo scoring. [Recording guide](docs/DEMO.md).
+
 ## What was wrong and what changed
 
 | Inherited behaviour | Resulting behaviour | Evidence |
@@ -138,7 +140,7 @@ python scripts/check.py
 
 The suite uses isolated temporary databases and never resets the local demo database. It checks backend contracts, interface behaviour and a production frontend build.
 
-At the verified local build: **76 backend tests and 7 interface tests pass**. Browser checks cover the actual local app; see [verification notes](docs/VERIFICATION.md) for scope and limits. A clean Windows clone and GitHub Actions on Linux also passed the setup and checks.
+At the verified local build: **78 backend tests and 10 interface tests pass**. Browser checks cover the actual local app; see [verification notes](docs/VERIFICATION.md) for scope and limits. A clean Windows clone and GitHub Actions on Linux also passed the setup and checks.
 
 Dependency checks:
 
@@ -166,4 +168,4 @@ Codex assisted with analysis, implementation, tests, interface design and docume
 
 A concrete AI mistake: an initially strict date field rejected valid ISO dates sent by the browser. The API test caught that; date parsing was made permissive while completion remains a strict boolean. Another broad text edit accidentally applied the scoring rate limit twice; the exact-boundary test exposed it, and the duplicate was removed. These are reasons to verify generated code, not reasons to trust a polished interface.
 
-The candidate must understand and be able to modify the submitted code. [Architecture](docs/ARCHITECTURE.md), [interview preparation](docs/INTERVIEW.md), and the [under-five-minute recording guide](docs/DEMO.md) support that handoff.
+The candidate must understand and be able to modify the submitted code. Start with [one assessment explained end to end](docs/EXPLAIN.md), then use [architecture](docs/ARCHITECTURE.md), [interview preparation and a timed coding exercise](docs/INTERVIEW.md), and the [under-five-minute recording guide](docs/DEMO.md).

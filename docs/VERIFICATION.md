@@ -8,8 +8,8 @@ The final local check command is **python scripts/check.py**.
 
 | Check | Result |
 | --- | --- |
-| Backend tests | 76 passed |
-| React interface tests in jsdom | 7 passed |
+| Backend tests | 78 passed |
+| React interface tests in jsdom | 10 passed |
 | Production frontend build | Passed |
 | Python runtime dependency audit | No known vulnerabilities reported |
 | npm dependency audit | No known vulnerabilities reported |
@@ -87,3 +87,15 @@ A separate Codex source review of the changes from the inherited baseline identi
 New regression cases reproduced both defects before the fixes. Exact risk counts now require five people on both sides; otherwise the UI says Protected without claiming a numeric range. The Unassigned row comes from organization memberships independently of completion. Tests cover first completion and deletion, complement boundaries, zero/all counts, deduplication and the displayed wording. The full suite and production build passed afterwards. The review was an AI-assisted source review, not an independent security certification; repeated snapshots and outside knowledge remain privacy limitations.
 
 The running dashboard was rechecked in the browser, including the protected Unassigned row and revised risk explanation. A restart check found the saved local environment still selected mock mode and Gemini 3.8 Flash. Only its non-secret mode/model settings were corrected. After restarting, the API and browser confirmed live mode, and a fresh synthetic provider request returned score 4 with only the expected policy-awareness flag. No credentials were added to Git.
+
+## Recovery, rehearsal and explanation audit — 28 October 2026
+
+The next audit reproduced another defect: a temporary network error or HTTP 503 during workspace loading discarded a valid token. Two regression tests failed before the change. Startup now offers Retry without exposing a private workspace prematurely, while a real 401 still clears the session. All three recovery scenarios pass.
+
+The new rehearsal launcher creates a fresh synthetic database and signing key on separate ports without changing the live environment. An integration test starts from a configured live database, prepares two rehearsals and confirms that the live data remains intact, both new databases have five completed Support employees, and scoring is forced to mock with no provider key. A second test confirms an occupied port is refused before services start. Service failure now gives the launcher a nonzero exit code.
+
+Browser verification confirmed the rehearsal on port 5174 with five completed Support people while the original API remained live on port 8000. Keyboard Enter worked for sign-in, workspace selection and data controls. The deletion dialog exposed its title, focused the confirmation field, kept deletion disabled initially, and closed with Escape while restoring focus. No data was deleted in this keyboard check. This is focused verification, not a comprehensive accessibility audit.
+
+The fallback activity explanation was made neutral so a frequent user is not incorrectly described as occasional. The explanation guide now traces an actual six-answer score, maps claims to tests and supplies a timed no-AI coding/debugging rehearsal. The full local suite and frontend production build passed after these changes. Docker is installed but its engine was not running; container execution remains unverified.
+
+A separate Codex source review of the recovery and rehearsal changes completed with no additional actionable P0–P2 findings. It inspected supplied source context and did not execute the application. This result applies to those changes; it is not a whole-system or production security certification.

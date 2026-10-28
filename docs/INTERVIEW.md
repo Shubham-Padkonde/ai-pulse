@@ -2,11 +2,13 @@
 
 Use this to learn the implementation, not as a claim that you wrote or understand code you have not reviewed. The assessment allows AI assistance but expects a live explanation, modification and debugging session without AI.
 
+Start with [one assessment from browser to database and back](EXPLAIN.md). It includes a sequence diagram, the actual 3.33-score example and questions to check your understanding.
+
 ## The opening explanation
 
 “I inherited a working but untrusted application. I focused first on who can see which data, what counts as a completed assessment, and whether an AI failure could become a misleading result. Then I implemented the client’s small-group and deletion requirements. My added feature gives the employee a private, practical plan for the following week.”
 
-Be precise about readiness: the local pilot and deterministic failure paths are verified. Live Gemini scoring and ten development cases were exercised. Independent model accuracy and production operations still need validation.
+Be precise about readiness: the local pilot and deterministic failure paths are verified. Live Gemini scoring, ten development cases and eight fresh fixed-prompt cases were exercised. Independent model accuracy and production operations still need validation.
 
 ## The six ideas to explain in your own words
 
@@ -74,3 +76,30 @@ Do not leave practice changes in the submission unless they are intentional and 
 Read the test for invalid model output. Follow the response from the fake provider to strict parsing, pending state and dashboard suppression. Then follow a successful retry.
 
 For an API error, inspect the HTTP status and sanitized detail first. For a missing team result, check completion status and threshold before changing the UI. Never “fix” a pending report by assigning a default score.
+
+## A 30-minute rehearsal without AI
+
+Close this chat, start a timer and use only the repository and terminal. Practise edits on a separate Git branch. Record yourself once to find unclear explanations; do not memorise a script.
+
+| Minutes | Task | What a convincing answer demonstrates |
+| --- | --- | --- |
+| 0–4 | Explain the product and your three highest-priority fixes | A clear user problem, priorities and an honest pilot scope |
+| 4–10 | Trace one submission from React through persistence, scoring and the report | You can locate the actual functions and explain when data is saved |
+| 10–18 | Change the maximum activity target date from 365 to 90 days ahead | Update the rule and message; prove day 90 succeeds and day 91 is rejected |
+| 18–24 | Debug a pending report whose retry returns 409 after the configured model changed | Inspect the response and provenance comparison; explain the deliberate retake requirement |
+| 24–28 | Explain a deletion that happens during an AI request | The final conditional database update prevents data from returning |
+| 28–30 | Name the next two rollout requirements and one thing you would keep simple | Prioritisation without claiming production readiness |
+
+For the code exercise, first read the existing activity ownership test. Work on temporary test data. Use `date.today() + timedelta(days=...)` rather than a hardcoded calendar date. Preserve strict boolean validation and ownership checks. Do not merge the practice rule into the submission unless you intentionally want that product change.
+
+<details>
+<summary>Answer locations — open only after trying</summary>
+
+- Date rule and validation message: `backend/app/routes/reports.py`, `update_action`. Extend the activity test in `backend/tests/test_reliability.py`. An accepted update must be visible in a fresh report; a rejected update must leave the old date unchanged.
+- Model mismatch: `services/assessments.py`, `score_saved`, comparing stored mode/model/rubric with current configuration. The safe user action is a deliberate retake. Silently rescoring under a different model would falsify provenance.
+- Deletion race: the final Assessment UPDATE checks ID, scoring state and claim timestamp. An affected-row count of zero prevents publishing the late result. `test_delete_while_model_is_running_cannot_resurrect_data` demonstrates it.
+- Reconnect: a network error does not prove a token expired. `session.test.jsx` covers both temporary failures and a genuine 401 rejection.
+
+</details>
+
+Use a simple pass criterion: explain each decision in ordinary language, find its implementation without searching this guide, predict the test result, and make the small change without AI. If any part is difficult, repeat that section before adding features.
