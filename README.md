@@ -6,8 +6,6 @@ A role-aware AI habits assessment with private employee reports, protected team 
 
 This extends the inherited FastAPI/React application and retains its Git history. It is ready for a local, synthetic-data client demonstration. Real employee rollout still needs the deployment and model-validation work described below.
 
-![AI Pulse dashboard](docs/screenshots/dashboard-desktop.jpg)
-
 ## Run locally
 
 Requirements: **Python 3.12+ (verified on 3.13), Node.js 24, npm and Git**.

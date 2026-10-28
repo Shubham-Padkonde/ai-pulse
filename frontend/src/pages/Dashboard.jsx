@@ -79,8 +79,7 @@ export default function Dashboard() {
           </div>
           <h2>
             Individual answers
-            <br />
-            stay individual.
+            <br /> stay individual.
           </h2>
           <p>Leadership receives protected group results.</p>
         </div>

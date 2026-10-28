@@ -44,13 +44,13 @@ The local app was checked through the in-app Chromium browser at desktop and pho
 
 - leadership login, organization selection and protected dashboard;
 - employee report and plan, saved completion after page reload, unchanged report score;
-- mobile navigation and page width;
+- mobile navigation and page width, including a 314-pixel report and plan with no sideways overflow;
 - deletion dialog begins with its destructive button disabled;
 - the first-time assessment flow through all six questions and submission; its completed report was confirmed in the API and in the browser after signing out and in again.
 
 The multi-company browser check passed: Ravi sees the Bluepeak admin dashboard, then loses the leadership navigation when switching back to Northwind as an employee.
 
-Screenshots in this directory show synthetic data. Browser deletion was not used to erase the main demonstration fixture; the isolated API tests verify the actual deletion and five-to-four boundary.
+Browser checks used synthetic data. Browser deletion was not used to erase the main demonstration fixture; the isolated API tests verify the actual deletion and five-to-four boundary.
 
 ## Limits of this evidence
 
