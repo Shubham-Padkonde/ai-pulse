@@ -114,6 +114,9 @@ The production frontend was also built with the public-demo notice and an empty
 API base, then served locally from the hosted startup command. Browser sign-in,
 organization selection and the saved personal report worked through that one
 origin. The ordinary live app runs as a VS Code task on ports 5173/8000.
-The new hosted-image CI job builds and smoke-tests the actual Linux container;
-its result and the external deployment must be checked before claiming hosting
-has succeeded.
+The new hosted-image CI job built and smoke-tested the actual Linux container
+successfully on commit `dc77380`, including the website, health endpoint,
+migrations, seed and authentication. The existing test/build job passed too.
+[CI evidence](https://github.com/Shubham-Padkonde/ai-pulse/actions/runs/40669267155).
+External hosting still requires account authentication and must be verified
+separately; a passing image check alone is not a completed public deployment.
