@@ -1,21 +1,52 @@
 import React from "react";
-import { api, setToken } from "../api.js";
-
-export default function OrgPicker({ orgs, onPick }) {
-  async function pick(o) {
-    const data = await api("/auth/select-org", { method: "POST", body: JSON.stringify({ org_id: o.org_id }) });
-    setToken(data.token);
-    onPick(o);
-  }
-
+import { ArrowRight, Building2, LogOut } from "lucide-react";
+import { Brand, Icon, Badge, ErrorMessage } from "../components";
+export default function OrgPicker({ session, onPick, busy, error, onLogout }) {
   return (
-    <div className="card">
-      <h2>Choose an organization</h2>
-      {orgs.map((o) => (
-        <p key={o.org_id}>
-          <button onClick={() => pick(o)}>{o.org_name}</button> <small>({o.role})</small>
+    <div className="org-page">
+      <header>
+        <Brand />
+        <button className="button quiet" onClick={onLogout}>
+          <Icon icon={LogOut} />
+          Sign out
+        </button>
+      </header>
+      <div className="org-content">
+        <p className="eyebrow">ONE ACCOUNT. SEPARATE WORKSPACES.</p>
+        <h1>Where are we working today?</h1>
+        <p className="subtitle">
+          Welcome, {session.name.split(" ")[0]}. Your role and data stay within
+          the organization you choose.
         </p>
-      ))}
+        {error && <ErrorMessage message={error} />}
+        <div className="org-grid">
+          {session.organizations.map((org) => (
+            <button
+              className="org-card panel"
+              key={org.org_id}
+              disabled={busy}
+              onClick={() => onPick(org)}
+            >
+              <span className="org-icon">
+                <Icon icon={Building2} size={25} />
+              </span>
+              <Badge tone={org.role === "admin" ? "purple" : "green"}>
+                {org.role === "admin" ? "Admin" : "Employee"}
+              </Badge>
+              <h2>{org.org_name}</h2>
+              <p>
+                {org.role === "admin"
+                  ? "Explore protected team insights"
+                  : "Your assessment and improvement plan"}
+              </p>
+              <span className="org-cta">
+                {busy ? "Opening workspace…" : "Open workspace"}
+                <Icon icon={ArrowRight} />
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
