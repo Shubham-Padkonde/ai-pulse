@@ -101,7 +101,9 @@ LLM_API_KEY=your-private-key
 LLM_MODEL=your-model-identifier
 ~~~
 
-Use the provider’s actual OpenAI-compatible chat-completions URL and a model that supports temperature and max_tokens. Remote endpoints require HTTPS; local HTTP model servers are permitted. Restart the backend after configuration changes. Never put credentials in the frontend, Git, a recording or a chat message.
+Use the provider’s actual OpenAI-compatible chat-completions URL. Generic providers must support temperature and max_tokens. Google Gemini uses low reasoning effort, temperature 0 and a bounded 2,048-token budget so reasoning does not consume the small response allowance. Remote endpoints require HTTPS; local HTTP model servers are permitted. Restart the backend after configuration changes. Never put credentials in the frontend, Git, a recording or a chat message.
+
+For the tested Google configuration, get a key from [Google AI Studio](https://aistudio.google.com/apikey), set LLM_API_URL to **https://generativelanguage.googleapis.com/v1beta/openai/chat/completions**, and set LLM_MODEL to **gemini-3.5-flash-lite**. Keep LLM_API_KEY only in your private backend environment. See [Google’s compatibility guide](https://ai.google.dev/gemini-api/docs/openai). Model availability and quota depend on the project. There is no automatic switch to another model after an error.
 
 Only question text and the written answer are sent to the model. The request does not include the employee’s name, email or organization. Free text can still contain identifying information; the UI asks employees to remove it. The system rubric and user answer are separate messages. That separation is useful, but is not a guarantee against prompt injection or semantic misclassification.
 
@@ -124,7 +126,7 @@ python scripts/evaluate.py
 
 Live evaluation makes ten bounded synthetic requests; provider charges may apply. The cases cover ordinary use, disclosure, negation and prompt injection. Results show schema validity, expected score ranges and exact risk matches. A failed expectation exits nonzero.
 
-**No live provider credentials were available during this implementation.** The provider contract and failure paths were tested with HTTP mocks. Live semantic accuracy remains unmeasured. The ten author-written cases are a smoke set, not a validated benchmark or evidence of fitness for employment decisions.
+**Live Google Gemini scoring was exercised on 28 October 2026.** Gemini 3.8 Flash returned capacity errors, so the demonstrated model is **gemini-3.5-flash-lite**. The initial run revealed two extra risk labels; a second run exposed a score-boundary ambiguity. After clarifying the rubric, version **pulse-rubric-v3** matched all ten score ranges and exact risk-label sets. These are iteratively tuned, author-written development cases, not an independent accuracy benchmark or evidence of fitness for employment decisions. All three sanitized runs are retained in [verification notes](docs/VERIFICATION.md). The provider contract and failure paths also have HTTP-mocked tests.
 
 ## Verification
 
@@ -134,7 +136,7 @@ python scripts/check.py
 
 The suite uses isolated temporary databases and never resets the local demo database. It checks backend contracts, interface behaviour and a production frontend build.
 
-At the verified local build: **66 backend tests and 6 interface tests pass**. Browser checks cover the actual local app; see [verification notes](docs/VERIFICATION.md) for scope and limits. A clean Windows clone and GitHub Actions on Linux also passed the setup and checks.
+At the verified local build: **68 backend tests and 6 interface tests pass**. Browser checks cover the actual local app; see [verification notes](docs/VERIFICATION.md) for scope and limits. A clean Windows clone and GitHub Actions on Linux also passed the setup and checks.
 
 Dependency checks:
 

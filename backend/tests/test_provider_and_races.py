@@ -10,7 +10,26 @@ from app.services.scoring import score_open_answer, ScoringUnavailable
 from tests.test_reliability import employee, payload, report
 
 
-def test_http_provider_contract_keeps_answer_out_of_system_prompt(monkeypatch):
+@pytest.mark.parametrize(
+    "endpoint,generation",
+    [
+        (
+            "https://example.test/chat/completions",
+            {"temperature": 0, "max_tokens": 350},
+        ),
+        (
+            "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+            {"reasoning_effort": "low", "temperature": 0, "max_tokens": 2048},
+        ),
+        (
+            "https://generativelanguage.googleapis.com.example.test/chat/completions",
+            {"temperature": 0, "max_tokens": 350},
+        ),
+    ],
+)
+def test_http_provider_contract_keeps_answer_out_of_system_prompt(
+    monkeypatch, endpoint, generation
+):
     captured = {}
     real_client = httpx.Client
 
@@ -30,7 +49,7 @@ def test_http_provider_contract_keeps_answer_out_of_system_prompt(monkeypatch):
         )
 
     monkeypatch.setattr(config, "AI_MODE", "live")
-    monkeypatch.setattr(config, "LLM_API_URL", "https://example.test/chat/completions")
+    monkeypatch.setattr(config, "LLM_API_URL", endpoint)
     monkeypatch.setattr(config, "LLM_MODEL", "test-model")
     monkeypatch.setattr(
         llm.httpx,
@@ -41,7 +60,10 @@ def test_http_provider_contract_keeps_answer_out_of_system_prompt(monkeypatch):
     assert score_open_answer("Describe your work", answer)["score"] == 4
     assert answer not in captured["messages"][0]["content"]
     assert json.loads(captured["messages"][1]["content"])["employee_answer"] == answer
-    assert captured["model"] == "test-model" and captured["temperature"] == 0
+    assert captured["model"] == "test-model"
+    assert {
+        k: v for k, v in captured.items() if k not in {"model", "messages"}
+    } == generation
 
 
 @pytest.mark.parametrize("kind", ["timeout", "429", "500", "bad_envelope"])

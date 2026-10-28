@@ -8,7 +8,7 @@ The final local check command is **python scripts/check.py**.
 
 | Check | Result |
 | --- | --- |
-| Backend tests | 66 passed |
+| Backend tests | 68 passed |
 | React interface tests in jsdom | 6 passed |
 | Production frontend build | Passed |
 | Python runtime dependency audit | No known vulnerabilities reported |
@@ -56,6 +56,22 @@ Browser checks used synthetic data. Browser deletion was not used to erase the m
 
 A passing API test is not a browser test. A mocked provider is not a real model evaluation. The interface suite uses jsdom, and the manual browser check is not a complete accessibility audit or coverage of every browser.
 
-No live model credentials were available. There is no measured live-model semantic accuracy, concurrency load benchmark, production deployment test, backup-restore exercise, or container execution result.
+There is no independent live-model semantic accuracy measurement, concurrency load benchmark, production deployment test, backup-restore exercise, or container execution result. The live development checks below must not be presented as a held-out accuracy benchmark.
 
 The included GitHub workflow ran the same setup and check commands successfully on Linux: [verified run](https://github.com/Shubham-Padkonde/ai-pulse/actions/runs/40649645631).
+
+## Live Gemini development checks — 28 October 2026
+
+The private local key authenticated successfully. Gemini 3.8 Flash timed out and then returned HTTP 503 high-demand errors. Gemini 3.5 Flash-Lite returned a valid synthetic score; the application was configured explicitly for that model. Model failures never trigger a silent model change.
+
+| Rubric | Valid outputs | Score ranges matched | Exact risk sets matched | Evidence |
+| --- | --- | --- | --- | --- |
+| v1 | 10/10 | 10/10 | 8/10 | [Initial run](evaluations/gemini-flash-lite-v1.json) |
+| v2 | 10/10 | 9/10 | 10/10 | [Risk clarification](evaluations/gemini-flash-lite-v2.json) |
+| v3 | 10/10 | 10/10 | 10/10 | [Frequency/review clarification](evaluations/gemini-flash-lite-v3.json) |
+
+The original rubric over-labelled confidential sharing when only customer records were described, and unreviewed output when an answer explicitly said it was read. The revised rubric treats each risk separately. The second run scored a regular, checked workflow too low; v3 makes that boundary explicit. The final request uses low reasoning effort, temperature 0 and a 2,048-token limit. This reduces sampling variation but does not guarantee deterministic results.
+
+These are the same ten author-written cases used during development. The final 10/10 is a calibration result, not unbiased accuracy evidence. No employee data or API key is included in the saved result files.
+
+The browser journey also passed against the real provider: a newly created synthetic employee in a separate local test workspace answered all six questions. The saved report showed a 3.33 average, the written answer received 4/5 with a relevant review-based explanation, and only the expected policy-awareness risk appeared. The private plan selected the policy-learning activity. The report persisted after reload with live mode, Gemini 3.5 Flash-Lite and rubric v3 recorded. Existing synthetic reports stayed labelled as samples.

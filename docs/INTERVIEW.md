@@ -6,7 +6,7 @@ Use this to learn the implementation, not as a claim that you wrote or understan
 
 “I inherited a working but untrusted application. I focused first on who can see which data, what counts as a completed assessment, and whether an AI failure could become a misleading result. Then I implemented the client’s small-group and deletion requirements. My added feature gives the employee a private, practical plan for the following week.”
 
-Be precise about readiness: the local pilot and deterministic failure paths are verified. Live model accuracy and production operations still need validation.
+Be precise about readiness: the local pilot and deterministic failure paths are verified. Live Gemini scoring and ten development cases were exercised. Independent model accuracy and production operations still need validation.
 
 ## The six ideas to explain in your own words
 
@@ -35,6 +35,8 @@ Be precise about readiness: the local pilot and deterministic failure paths are 
 **Why keep SQLite?** It is adequate for a small local pilot and makes setup easy. Writes are short and model calls happen outside transactions. Multiple application workers, sustained load and shared operations would justify PostgreSQL and a job queue. There is no production-scale claim.
 
 **Why not use a background queue now?** It adds infrastructure, delivery semantics and monitoring. The pilot uses bounded synchronous scoring with a recoverable state and explicit retry. A queue becomes useful when long jobs, throughput or durable automatic retries are required.
+
+**What did the live test change?** Gemini 3.8 Flash returned capacity errors, so the demonstrated model is Gemini 3.5 Flash-Lite. Initial results over-reported two risks. Clarifying independent risk evidence fixed those; the next run exposed a regular-use scoring ambiguity. The final rubric makes frequency and review explicit and passed the ten development cases. The rubric version is stored with each assessment. These tuned cases do not establish general accuracy.
 
 **Does a valid JSON response mean the AI is correct?** No. Schema checks prevent malformed or out-of-range output. They cannot establish semantic accuracy. The live smoke cases include negation and injection; a larger independently labelled set and domain review are still needed.
 

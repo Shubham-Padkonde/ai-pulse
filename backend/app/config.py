@@ -32,4 +32,4 @@ CORS_ORIGINS = os.getenv(
 ).split(",")
 TOKEN_HOURS = 1
 MIN_GROUP_SIZE = 5
-PROMPT_VERSION = "pulse-rubric-v1"
+PROMPT_VERSION = "pulse-rubric-v3"
