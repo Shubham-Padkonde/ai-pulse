@@ -14,6 +14,12 @@ if len(SECRET_KEY) < 32 or SECRET_KEY.startswith(("ai-pulse-dev", "pulse-7f")):
         "Set a new SECRET_KEY of at least 32 characters. Run scripts/setup.py."
     )
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./aipulse.db")
+# Hosting providers supply either postgres:// or postgresql://. Select the
+# installed Psycopg 3 driver explicitly while preserving credentials/options.
+for prefix in ("postgres://", "postgresql://"):
+    if DATABASE_URL.startswith(prefix):
+        DATABASE_URL = "postgresql+psycopg://" + DATABASE_URL[len(prefix) :]
+        break
 AI_MODE = os.getenv("AI_MODE", "mock")
 if AI_MODE not in {"mock", "live"}:
     raise RuntimeError("AI_MODE must be mock or live")

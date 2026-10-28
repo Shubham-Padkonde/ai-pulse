@@ -55,3 +55,28 @@ jobs:
       - name: Container diagnostics
         if: failure()
         run: docker logs pulse-smoke
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: pulse_test
+          POSTGRES_PASSWORD: disposable-ci-password
+          POSTGRES_DB: aipulse_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install -r backend/requirements-dev.txt
+      - name: PostgreSQL migration and complete assessment journey
+        working-directory: backend
+        env:
+          PULSE_TEST_POSTGRES_URL: postgresql://pulse_test:disposable-ci-password@127.0.0.1:5432/aipulse_test
+        run: python -m pytest tests/test_postgres.py -q
