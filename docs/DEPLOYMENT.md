@@ -1,5 +1,7 @@
 # Hosting the reviewer demo
 
+**Live:** https://ai-pulse-reviewer.onrender.com/ — deployed and checked on 28 October 2026. Employee: `new@northwind.test`; Northwind admin: `asha@northwind.test`; shared demo password: `pulse123`. The employee account currently has a verified live assessment and can retake it. Use fictional answers only.
+
 The root Dockerfile builds React and serves its static output through the same
 FastAPI process as the API. An empty `VITE_API_URL` means same-origin requests;
 no public browser calls localhost. The build contains a shared-account notice.

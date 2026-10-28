@@ -34,7 +34,9 @@ Be precise about readiness: the local pilot and deterministic failure paths are 
 
 ## Likely interview questions
 
-**Why keep SQLite?** It is adequate for a small local pilot and makes setup easy. Writes are short and model calls happen outside transactions. Multiple application workers, sustained load and shared operations would justify PostgreSQL and a job queue. There is no production-scale claim.
+**Why use SQLite locally and PostgreSQL on Render?** SQLite makes the local pilot easy to run without a database service. Hosted container files are temporary, so the public demo uses a separate PostgreSQL database that survives website restarts. SQLAlchemy and Alembic support both. I verified a real live report and completed activity after restarting Render. Writes are short and model calls happen outside transactions. Multiple workers and sustained load still need a shared limiter, coordinated jobs and operational testing; choosing PostgreSQL alone does not make the app production-ready.
+
+**How is the public version deployed?** Docker builds React, then FastAPI serves the built pages and API from one HTTPS origin. Render provides HTTPS and private server variables for the Google key and database connection. The container runs as an unprivileged user. Startup validates configuration, applies migrations and seeds only an empty database. Free hosting sleeps when idle, and the free database expires after 30 days; it is a time-limited reviewer demo.
 
 **Why not use a background queue now?** It adds infrastructure, delivery semantics and monitoring. The pilot uses bounded synchronous scoring with a recoverable state and explicit retry. A queue becomes useful when long jobs, throughput or durable automatic retries are required.
 

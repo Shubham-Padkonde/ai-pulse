@@ -15,14 +15,14 @@ The main improvement is trust: the API checks ownership, requires a complete ass
 | React interface | Collect answers and display API results | frontend/src/App.jsx and pages/ |
 | FastAPI routes | Validate requests and enforce access | backend/app/routes/ and auth.py |
 | Assessment services | Manage completion, scoring and plans | backend/app/services/ |
-| SQLite database | Keep accounts, memberships, answers and progress across restarts | backend/app/models.py and db.py |
+| SQL database | Keep accounts, memberships, answers and progress across restarts; SQLite locally, PostgreSQL on Render | backend/app/models.py and db.py |
 | Optional Gemini provider | Score the written answer against the stated rubric | backend/app/services/llm.py and scoring.py |
 
 ~~~mermaid
 sequenceDiagram
     participant E as Employee's browser
     participant A as FastAPI
-    participant D as SQLite
+    participant D as SQL database
     participant M as AI provider
     E->>A: Sign in and choose company
     A->>D: Verify identity and membership
@@ -45,6 +45,10 @@ sequenceDiagram
 ~~~
 
 The database transaction is released before the provider request. A slow network call therefore does not hold the database write lock. In demo mode the provider call is replaced with a labelled fixed fixture.
+
+For the public demo, Docker builds React once and FastAPI serves both the pages and API from one HTTPS address. Render runs that container and a separate PostgreSQL database. The Google key stays in the server's private environment; it is never shipped in React. Restarting the website replaces the running process but leaves the database intact. This was checked on the public site with a saved live report and completed activity. Local VS Code development keeps SQLite and separate Vite/API ports for a simpler setup.
+
+**Check yourself:** Why would putting SQLite on an ephemeral hosting filesystem lose data? Where does the public Google key live, and why must it never be a frontend variable?
 
 ## 1. Sign-in does not decide every permission
 
@@ -78,7 +82,7 @@ Valid JSON does not prove correct interpretation. Ten development cases helped t
 
 ## 4. Work through the score yourself
 
-The verified live example has scores **4, 1, 4, 4, 4, 3**. Their sum is 20, so the personal average is **20 / 6 = 3.33** when displayed. Its level is Practitioner.
+The verified public live example has scores **4, 1, 4, 4, 4, 4**. Their sum is 21, so the personal average is **21 / 6 = 3.50** when displayed. Its level is Practitioner. The earlier separate local example averaged 3.33; these are different synthetic submissions, not a changed score after completing an activity.
 
 Multiple-choice scores come from the questionnaire. Gemini scored the written answer. The low policy answer selected a policy-learning activity. The written response also explicitly stated policy uncertainty, so that risk was consistent with the questionnaire.
 
@@ -139,6 +143,7 @@ The recovery tests first reproduced the old behaviour, which discarded a valid t
 | Provider failures and competing requests | backend/tests/test_provider_and_races.py |
 | Existing answers survive schema upgrades | backend/tests/test_migrations.py |
 | Rehearsal preserves the configured live database | backend/tests/test_rehearsal.py |
+| Hosted startup, persistent storage and private-file protection | backend/tests/test_hosted.py and test_postgres.py; public restart evidence in docs/VERIFICATION.md |
 | Interface and recovery flows | frontend/src/test/flows.test.jsx and session.test.jsx |
 | Actual model behaviour and limits | docs/evaluations/ and docs/VERIFICATION.md |
 | Original feature and deliberate tradeoffs | README.md and docs/ARCHITECTURE.md |

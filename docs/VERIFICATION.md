@@ -18,6 +18,9 @@ The final local check command is **python scripts/check.py**.
 | Live evaluation dry run | Lists ten cases; makes no network calls |
 | Fresh-clone setup with a new environment and demo database | Passed; all tests and production build also passed |
 | GitHub Actions on Ubuntu, Python 3.13 and Node 24 | Passed |
+| Real PostgreSQL 18 integration test in CI | 1 passed; separately skipped in the default local suite |
+| Linux hosted container build and startup smoke test | Passed in CI |
+| Public Render live-AI journey and service restart persistence | Passed |
 
 The backend test runner currently emits a Starlette warning that its httpx-based test client will be replaced. Tests pass; a test-client dependency migration is deferred.
 
@@ -58,7 +61,7 @@ Browser checks used synthetic data. Browser deletion was not used to erase the m
 
 A passing API test is not a browser test. A mocked provider is not a real model evaluation. The interface suite uses jsdom, and the manual browser check is not a complete accessibility audit or coverage of every browser.
 
-There is no independent live-model semantic accuracy measurement, concurrency load benchmark, production deployment test, backup-restore exercise, or container execution result. The live development checks below must not be presented as a held-out accuracy benchmark.
+There is no independent live-model semantic accuracy measurement, concurrency load benchmark or backup-restore exercise. Container execution and the public reviewer deployment were subsequently checked as recorded below; those smoke checks do not establish production readiness. The tuned live development cases must not be presented as a held-out accuracy benchmark.
 
 The included GitHub workflow ran the same setup and check commands successfully on Linux after the privacy fixes: [verified run](https://github.com/Shubham-Padkonde/ai-pulse/actions/runs/40660723243).
 
@@ -96,7 +99,7 @@ The new rehearsal launcher creates a fresh synthetic database and signing key on
 
 Browser verification confirmed the rehearsal on port 5174 with five completed Support people while the original API remained live on port 8000. Keyboard Enter worked for sign-in, workspace selection and data controls. The deletion dialog exposed its title, focused the confirmation field, kept deletion disabled initially, and closed with Escape while restoring focus. No data was deleted in this keyboard check. This is focused verification, not a comprehensive accessibility audit.
 
-The fallback activity explanation was made neutral so a frequent user is not incorrectly described as occasional. The explanation guide now traces an actual six-answer score, maps claims to tests and supplies a timed no-AI coding/debugging rehearsal. The full local suite and frontend production build passed after these changes. Docker is installed but its engine was not running; container execution remains unverified.
+The fallback activity explanation was made neutral so a frequent user is not incorrectly described as occasional. The explanation guide now traces an actual six-answer score, maps claims to tests and supplies a timed no-AI coding/debugging rehearsal. The full local suite and frontend production build passed after these changes. The local Docker engine was not running; later Linux CI supplied the container evidence recorded below.
 
 A separate Codex source review of the recovery and rehearsal changes completed with no additional actionable P0–P2 findings. It inspected supplied source context and did not execute the application. This result applies to those changes; it is not a whole-system or production security certification.
 
@@ -118,5 +121,50 @@ The new hosted-image CI job built and smoke-tested the actual Linux container
 successfully on commit `dc77380`, including the website, health endpoint,
 migrations, seed and authentication. The existing test/build job passed too.
 [CI evidence](https://github.com/Shubham-Padkonde/ai-pulse/actions/runs/40669267155).
-External hosting still requires account authentication and must be verified
-separately; a passing image check alone is not a completed public deployment.
+At that stage, external hosting still required account authentication. The
+following checks establish the later public deployment separately.
+
+## Public Render deployment — 28 October 2026
+
+[The reviewer demo](https://ai-pulse-reviewer.onrender.com/) runs a free Docker
+web service and a separate free PostgreSQL 18 database in Singapore. The local
+database was not uploaded. Google credentials are private runtime variables;
+the image and Git history contain no new provider secret.
+
+All three [CI jobs passed on deployment commit d969a8f](https://github.com/Shubham-Padkonde/ai-pulse/actions/runs/40671363753):
+80 backend tests and 10 interface tests with a production build; the actual
+Linux container build/startup smoke test; and one real PostgreSQL integration
+test. The PostgreSQL test covers fresh/repeated migrations, seed, authentication,
+assessment completion, saved activity state across a new Python process,
+deletion and role boundaries. A local disposable PostgreSQL startup attempt
+failed, so the passing PostgreSQL evidence is explicitly from Linux CI.
+
+The public browser journey signed in as the fictional `new@northwind.test`,
+answered all six questions and received a completed live report from
+`gemini-3.5-flash-lite`, rubric `pulse-rubric-v3`. Its scores were
+**4, 1, 4, 4, 4, 4**, giving **3.50/5** and Practitioner. The only risk was
+policy uncertainty, and the rules selected one policy-learning activity.
+Marking that activity complete saved **1/1** progress without changing the score.
+
+Render recorded **Service restarted by you at 4:00 PM IST**. Reloading the public
+browser and separately signing in through the public API both recovered the same
+completed live report, score and completed activity. The stable database and
+signing secret survived the web process restart.
+
+Public API checks also confirmed:
+
+- employee dashboard access and foreign organization selection return 403;
+- an admin cannot query another organization's dashboard;
+- HR, Sales and Unassigned rows remain protected, with no count, score or risks;
+- unauthenticated personal reports and dashboards return 401;
+- `/.env`, `/aipulse.db` and `/app/config.py` return 404;
+- `/health` reports `ok` and `live`; the independent local API also remains live.
+
+No public fixture was deleted during this smoke check. Deletion is covered by
+the isolated SQLite and real PostgreSQL suites. Shared reviewer accounts can be
+changed by later visitors, so the report above is evidence of the checked run,
+not a promise that the shared account will retain that exact state.
+
+Free hosting has concrete limits: an idle website can take about a minute to
+wake, and the free database expires 30 days after creation with no managed
+backups. This is a time-limited demonstration, not a production deployment claim.

@@ -20,6 +20,14 @@ flowchart LR
 
 FastAPI routes handle transport and authorization. Small service modules own question selection, assessment lifecycle, model validation, activity selection and publication privacy. React pages call the API; the browser never decides whether a person may access data.
 
+## Local and hosted execution
+
+Local development uses Vite on port 5173, FastAPI on 8000 and a private SQLite file. The root Dockerfile builds the frontend and serves its static files through FastAPI after the API routes. Hosted browser requests use the same HTTPS origin. The image runs as an unprivileged user and never includes the local environment file or database.
+
+On Render, `render.yaml` connects the single web worker to a separate PostgreSQL database over the internal network. SQLAlchemy uses psycopg for PostgreSQL; the models and Alembic schema support both databases. Startup requires explicit storage and a stable signing secret, applies migrations and seeds fictional accounts only when the database has no users. A restart therefore cannot reset existing answers. The database connection checks stale pooled connections before reuse. The Google key stays in Render's private runtime environment.
+
+The free hosting choice is for the assessment demo: the website sleeps when idle, and the database expires after 30 days without an upgrade. Separate storage establishes persistence across web-service restarts, not a backup or recovery guarantee. Horizontal scaling and production operations remain out of scope.
+
 ## Ownership
 
 A user has memberships in organizations. A membership carries role, department, job role and seniority. An assessment belongs to exactly one membership. Answers and activities belong to that assessment.
@@ -54,7 +62,7 @@ The Unassigned row is included whenever organization memberships lack a valid de
 
 Deletion increments the affected membership revisions, removes responses, deletes assessments, and cascades to activities inside one transaction. Current or all memberships are resolved from the authenticated user. No report cache or raw-answer audit log needs a separate purge.
 
-The account remains. Deleted rows may remain recoverable in SQLite storage pages, external backups or provider systems; the pilot does not claim forensic erasure. A production retention policy must cover those systems. Fresh database-backed dashboard reads no longer include the rows; browser views refresh every two seconds when visible and on focus.
+The account remains. Deleted rows may remain recoverable in database storage pages, external backups or provider systems; the pilot does not claim forensic erasure. A production retention policy must cover those systems. Fresh database-backed dashboard reads no longer include the rows; browser views refresh every two seconds when visible and on focus.
 
 ## Why the plan uses rules
 

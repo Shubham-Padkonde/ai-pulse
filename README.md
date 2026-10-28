@@ -2,9 +2,11 @@
 
 A role-aware AI habits assessment with private employee reports, protected team insights, and a **private one-week improvement plan**.
 
-[Repository](https://github.com/Shubham-Padkonde/ai-pulse) · [Automated checks](https://github.com/Shubham-Padkonde/ai-pulse/actions/workflows/checks.yml)
+[Live reviewer demo](https://ai-pulse-reviewer.onrender.com/) · [Repository](https://github.com/Shubham-Padkonde/ai-pulse) · [Automated checks](https://github.com/Shubham-Padkonde/ai-pulse/actions/workflows/checks.yml)
 
 This extends the inherited FastAPI/React application and retains its Git history. It supports a local synthetic-data demonstration and a single-service hosted reviewer demo with persistent storage. Real employee rollout still needs operational hardening and model validation. [Hosting and VS Code guide](docs/DEPLOYMENT.md).
+
+The public demo uses live Google Gemini scoring and a separate PostgreSQL database. Use fictional answers only: its accounts are shared. The free website may take about a minute to wake after inactivity, and the free database expires 30 days after creation unless upgraded. The hosted report and plan were verified to survive a service restart on 28 October 2026.
 
 ## Run locally
 
@@ -33,12 +35,14 @@ All demo passwords are **pulse123**. These accounts are deliberately public fixt
 | --- | --- |
 | asha@northwind.test | Northwind admin; visible Engineering and Support teams, protected HR and Sales |
 | priya@northwind.test | Support employee; personal report and three private activities |
-| new@northwind.test | Support employee with no assessment; try the full journey |
+| new@northwind.test | Support employee; empty on a fresh seed, ready to take or retake an assessment |
 | dev@northwind.test | Engineering lead; more role and seniority questions |
 | ravi@consult.test | Employee at Northwind, admin at Bluepeak |
 | meera@bluepeak.test | Bluepeak admin; small departments remain protected |
 
 The login page fills example credentials when a demo perspective is selected. It does not sign in automatically.
+
+At the public deployment check, `new@northwind.test` had a completed live report of **3.50/5** and one completed policy-learning activity. Shared visitors can change this state; use Retake assessment for the full journey or the separate local rehearsal for a reproducible recording.
 
 For a fresh recording fixture without changing the live configuration or database, run **python scripts/rehearse.py** after setup. It opens a separate synthetic workspace at **http://127.0.0.1:5174**, with exactly five completed Support employees. Each launch creates a new ignored database and always uses demo scoring. [Recording guide](docs/DEMO.md).
 
@@ -140,7 +144,7 @@ python scripts/check.py
 
 The suite uses isolated temporary databases and never resets the local demo database. It checks backend contracts, interface behaviour and a production frontend build.
 
-At the verified local build: **78 backend tests and 10 interface tests pass**. Browser checks cover the actual local app; see [verification notes](docs/VERIFICATION.md) for scope and limits. A clean Windows clone and GitHub Actions on Linux also passed the setup and checks.
+At the verified build: **80 backend tests and 10 interface tests pass**, plus a separate real PostgreSQL integration test in CI. The Linux container build and startup smoke test also pass. Browser checks cover the local app and a public live-AI assessment with saved progress across a service restart; see [verification notes](docs/VERIFICATION.md) for scope and limits. A clean Windows clone and GitHub Actions on Linux also passed the setup and checks.
 
 Dependency checks:
 
@@ -154,12 +158,12 @@ The current scans reported no known vulnerabilities. This is a dated dependency 
 
 ## Deliberate limits
 
-- **Local single-worker pilot:** SQLite, synchronous bounded scoring, and a process-local rate limiter. Horizontal scale needs a shared limiter, durable job queue, operational monitoring and a production database.
+- **Single-worker pilot:** SQLite locally, PostgreSQL on Render, synchronous bounded scoring, and a process-local rate limiter. Horizontal scale still needs a shared limiter, durable job queue and operational monitoring.
 - **No real-user identity administration:** enterprise SSO, provisioning, account removal and immediate token revocation are deferred. Tokens expire after one hour; sign-out clears the browser session.
 - **No arbitrary exports, filters or historical dashboards:** each would add a privacy surface.
 - **No claim of AI calibration:** the original equal-weight rubric and maturity labels need client/domain validation. A high maturity score can coexist with risky behaviour.
-- **No deployment compliance claim:** HTTPS termination, infrastructure secrets, backup and deletion policy, provider agreements and access auditing remain rollout requirements.
-- **No automated container verification:** the backend Dockerfile was corrected, but Docker was unavailable locally. The verified path is the Python/Node setup above.
+- **Time-limited public demo:** Render provides HTTPS and private service variables. Its free database expires after 30 days and has no managed backups. Backup/restore and deletion policies, provider agreements and access auditing remain rollout requirements.
+- **Container evidence is from Linux CI and Render:** the local Docker engine was unavailable; the Python/Node setup above is the verified local path.
 - **Manual browser verification:** the interface tests use jsdom; they are not a cross-browser certification or a full accessibility audit.
 
 ## AI assistance and ownership
