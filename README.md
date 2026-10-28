@@ -1,58 +1,165 @@
-# AI Pulse
+# AI Pulse client pilot
 
-AI Pulse helps a company understand how well its people use AI at work, team by team.
+A role-aware AI habits assessment with private employee reports, protected team insights, and a **private one-week improvement plan**.
 
-- **Employees** sign in, pick their organization, and take a short diagnostic. Questions adapt to their job role and seniority. One open-ended answer is scored by an LLM.
-- **Each employee** gets a personal report: maturity level, risks, and next steps for their role.
-- **Company admins** see a dashboard of AI maturity by department and the top risks across the company.
-- Some users (consultants, group-company HR) belong to **more than one organization** and choose one after login.
+This extends the inherited FastAPI/React application and retains its Git history. It is ready for a local, synthetic-data client demonstration. Real employee rollout still needs the deployment and model-validation work described below.
 
-This codebase was started by a previous developer who has since left. It runs, but it is unfinished, and we are not confident in all of it.
+![AI Pulse dashboard](docs/screenshots/dashboard-desktop.jpg)
 
-## Stack
+## Run locally
 
-- Backend: Python, FastAPI, SQLAlchemy (SQLite by default)
-- Frontend: React (Vite)
-- AI: any OpenAI-compatible chat completions endpoint, or mock mode with canned responses
+Requirements: **Python 3.12+ (verified on 3.13), Node.js 24, npm and Git**.
 
-## Run it locally
+From the repository root, on Windows, macOS or Linux:
 
-Backend:
+~~~sh
+python scripts/setup.py --demo
+python scripts/run.py
+~~~
 
-```bash
-cd backend
-pip install -r requirements.txt
-python -m app.seed          # creates demo data, password for all users: pulse123
-uvicorn app.main:app --reload
-```
+On systems where Python is named python3, use that command instead.
 
-Frontend:
+Open **http://127.0.0.1:5173**. API documentation: **http://127.0.0.1:8000/docs**.
 
-```bash
+Setup creates an isolated Python environment, installs locked dependencies, generates a private random signing key, runs Alembic migrations and optionally seeds synthetic accounts. Existing databases are never reset. Running setup again is safe. Stop the local services with Ctrl+C. If a port is occupied, stop the conflicting local service before restarting.
+
+The generated **backend/.env**, database and installed dependencies stay outside Git. The inherited signing key was public; the current application rejects it. Old history is retained, but that old key must never be used.
+
+### Synthetic demo accounts
+
+All demo passwords are **pulse123**. These accounts are deliberately public fixtures, suitable only for a local demo.
+
+| Account | Perspective |
+| --- | --- |
+| asha@northwind.test | Northwind admin; visible Engineering and Support teams, protected HR and Sales |
+| priya@northwind.test | Support employee; personal report and three private activities |
+| new@northwind.test | Support employee with no assessment; try the full journey |
+| dev@northwind.test | Engineering lead; more role and seniority questions |
+| ravi@consult.test | Employee at Northwind, admin at Bluepeak |
+| meera@bluepeak.test | Bluepeak admin; small departments remain protected |
+
+The login page fills example credentials when a demo perspective is selected. It does not sign in automatically.
+
+## What was wrong and what changed
+
+| Inherited behaviour | Resulting behaviour | Evidence |
+| --- | --- | --- |
+| Caller-selected organization could cross the tenant boundary | The token establishes organization scope; every request checks current database membership and role. Foreign organization selection or dashboard access returns 403. | Tenant tests; Ravi demo account |
+| Partial, duplicate or wrong-role submissions could produce misleading reports | The server requires each currently assigned question exactly once and validates every option and written answer. | Submission contract tests |
+| Rows did not reliably establish completion | One versioned current assessment per membership; only fully scored completed assessments contribute. Retries do not create another person. | Lifecycle and idempotency tests |
+| Small departments exposed information | Below five completed people, the API returns no score, exact count, level or risk breakdown. | 0/1/4/5/6 boundary tests |
+| No employee deletion workflow | Current-company or all-membership deletion removes answers, reports and activities in one transaction. Late AI results cannot recreate them. | Delete and in-flight scoring tests |
+| Model output could be loosely interpreted | Exact JSON fields, integer score 1–5, nonempty reason, four allowlisted risk labels; invalid output and provider failure leave scoring pending. | Parser and mocked provider tests |
+| Weak password storage and a tracked signing secret | Salted Argon2 hashes, legacy upgrade on successful login, generated local secret, expiring scoped JWTs, bounded requests and local rate limits. | Authentication tests |
+| Setup could damage data and lacked migrations | Explicit demo seed, nondestructive startup, fresh and legacy Alembic migration tests. | Migration tests |
+| Results gave employees little help with the next step | A small private activity plan links observed gaps to practical exercises, target dates and completion. | Plan API and interface tests |
+
+The questionnaire itself is retained. The product remains a self-reported diagnostic, not a validated measure of employee performance.
+
+## The client request
+
+**Small groups:** I chose suppression instead of combining departments into “Other teams.” Combining semantically different teams would be harder to interpret and could accidentally expose a small remainder.
+
+- Completed **people** are counted, with one current assessment each.
+- Each person's average has equal weight in the department average, regardless of how many role-specific questions they answered.
+- All four risk categories appear in a fixed order for visible teams. Counts from zero through four share the same protected band.
+- There is no company-wide score, participant total or risk total from which hidden departments could be reconstructed by subtraction.
+- Department names remain visible; their protected numbers do not.
+
+**Deletion:** The employee can delete the current organization’s diagnostic or all their organizational diagnostics. Account and membership records remain so they can sign in again. Responses, the assessment and its plan are removed together, including legacy answers.
+
+Fresh API reads exclude the deletion after the transaction commits. Already open views refresh every two seconds while visible and on focus; there is no server-side report cache. “Immediately” therefore means immediate backend exclusion, with a bounded UI refresh delay under normal network conditions. Previously saved screenshots and external provider retention cannot be revoked.
+
+**Questions for the client before rollout:** Does “all my data” include account removal and identity records? Are department names acceptable? Is the two-second refresh window acceptable? What retention, backup-erasure and model-provider terms are required? What protection is needed against someone comparing many snapshots over time?
+
+Suppression is not differential privacy and cannot guarantee anonymity against outside knowledge or repeated observations. Those residual risks require a client decision.
+
+## Original feature: a private one-week improvement plan
+
+Employees need something useful after receiving a score. The plan suggests up to three short activities from a curated catalog, with:
+
+- the reason each activity was selected;
+- an example appropriate to the employee’s role;
+- practical steps and a clear completion criterion;
+- an editable target date, initially one week away;
+- completion and undo, visible only to the employee.
+
+Rules prioritise data handling, review and policy gaps; a small practice workflow is the fallback. This is deliberately deterministic and inspectable. Another generative call would add cost and more opportunities for unreliable advice.
+
+Completion is self-reported and **never raises the diagnostic score**. A changed retake replaces the old plan. Deleting the diagnostic removes the plan. Identical submissions reuse the current assessment and preserve its progress.
+
+## AI behaviour and live mode
+
+The default is clearly labelled **demo scoring**. Written answers receive a fixed sample score of 3, with an explanation saying it is a fixture. Seeded results are synthetic. Neither is presented as a real evaluation.
+
+For live scoring, edit the private **backend/.env** locally, keeping its generated SECRET_KEY:
+
+~~~dotenv
+AI_MODE=live
+LLM_API_URL=https://your-provider.example/v1/chat/completions
+LLM_API_KEY=your-private-key
+LLM_MODEL=your-model-identifier
+~~~
+
+Use the provider’s actual OpenAI-compatible chat-completions URL and a model that supports temperature and max_tokens. Remote endpoints require HTTPS; local HTTP model servers are permitted. Restart the backend after configuration changes. Never put credentials in the frontend, Git, a recording or a chat message.
+
+Only question text and the written answer are sent to the model. The request does not include the employee’s name, email or organization. Free text can still contain identifying information; the UI asks employees to remove it. The system rubric and user answer are separate messages. That separation is useful, but is not a guarantee against prompt injection or semantic misclassification.
+
+Provider timeouts, rate limits, invalid envelopes and malformed content are handled without a fabricated score or raw provider error. Pending assessments are excluded from dashboards. Employees can retry or delete them. If the model configuration changed, a retake is required to preserve honest provenance.
+
+Every assessment stores its questionnaire snapshot/version, rubric version, scoring mode and model. Enabling live mode does not relabel old synthetic reports.
+
+### Evaluate a configured model
+
+~~~sh
+# No network calls; explains the available synthetic cases
+python scripts/evaluate.py
+
+# Windows
+.venv\Scripts\python.exe scripts/evaluate.py --live --output work/live-evaluation.json
+
+# macOS / Linux
+.venv/bin/python scripts/evaluate.py --live --output work/live-evaluation.json
+~~~
+
+Live evaluation makes ten bounded synthetic requests; provider charges may apply. The cases cover ordinary use, disclosure, negation and prompt injection. Results show schema validity, expected score ranges and exact risk matches. A failed expectation exits nonzero.
+
+**No live provider credentials were available during this implementation.** The provider contract and failure paths were tested with HTTP mocks. Live semantic accuracy remains unmeasured. The ten author-written cases are a smoke set, not a validated benchmark or evidence of fitness for employment decisions.
+
+## Verification
+
+~~~sh
+python scripts/check.py
+~~~
+
+The suite uses isolated temporary databases and never resets the local demo database. It checks backend contracts, interface behaviour and a production frontend build.
+
+At the verified local build: **66 backend tests and 6 interface tests pass**. Browser checks cover the actual local app; see [verification notes](docs/VERIFICATION.md) for scope and limits. GitHub Actions runs the same setup and checks.
+
+Dependency checks:
+
+~~~sh
+.venv\Scripts\python.exe -m pip_audit -r backend/requirements.txt
 cd frontend
-npm install
-npm run dev                 # http://localhost:5173
-```
+npm audit
+~~~
 
-Tests:
+The current scans reported no known vulnerabilities. This is a dated dependency check, not a security certification.
 
-```bash
-cd backend
-python -m pytest
-```
+## Deliberate limits
 
-## Demo accounts (password `pulse123`)
+- **Local single-worker pilot:** SQLite, synchronous bounded scoring, and a process-local rate limiter. Horizontal scale needs a shared limiter, durable job queue, operational monitoring and a production database.
+- **No real-user identity administration:** enterprise SSO, provisioning, account removal and immediate token revocation are deferred. Tokens expire after one hour; sign-out clears the browser session.
+- **No arbitrary exports, filters or historical dashboards:** each would add a privacy surface.
+- **No claim of AI calibration:** the original equal-weight rubric and maturity labels need client/domain validation. A high maturity score can coexist with risky behaviour.
+- **No deployment compliance claim:** HTTPS termination, infrastructure secrets, backup and deletion policy, provider agreements and access auditing remain rollout requirements.
+- **No automated container verification:** the backend Dockerfile was corrected, but Docker was unavailable locally. The verified path is the Python/Node setup above.
+- **Manual browser verification:** the interface tests use jsdom; they are not a cross-browser certification or a full accessibility audit.
 
-| Email | Organization(s) | Role |
-|---|---|---|
-| asha@northwind.test | Northwind Logistics | Admin |
-| meera@bluepeak.test | Bluepeak Retail | Admin |
-| ravi@consult.test | Both | Employee at Northwind, admin at Bluepeak |
-| priya@northwind.test | Northwind Logistics | Employee (Support) |
-| dev@northwind.test | Northwind Logistics | Employee (Engineering, lead) |
+## AI assistance and ownership
 
-## AI mode
+Codex assisted with analysis, implementation, tests, interface design and documentation. Public forks were inspected at the user's request to understand existing approaches; this implementation was developed from the original repository rather than copying a fork.
 
-`AI_MODE=mock` (default) returns canned model responses from `backend/data/mock_ai_responses.json`. Like a real model, they are not always well-formed.
+A concrete AI mistake: an initially strict date field rejected valid ISO dates sent by the browser. The API test caught that; date parsing was made permissive while completion remains a strict boolean. Another broad text edit accidentally applied the scoring rate limit twice; the exact-boundary test exposed it, and the duplicate was removed. These are reasons to verify generated code, not reasons to trust a polished interface.
 
-`AI_MODE=live` calls `LLM_API_URL` with `LLM_API_KEY` and `LLM_MODEL`.
+The candidate must understand and be able to modify the submitted code. [Architecture](docs/ARCHITECTURE.md), [interview preparation](docs/INTERVIEW.md), and the [under-five-minute recording guide](docs/DEMO.md) support that handoff.

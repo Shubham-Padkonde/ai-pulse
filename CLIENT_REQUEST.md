@@ -10,4 +10,4 @@
 >
 > Thanks, Northwind HR
 
-Not started yet.
+Implemented for the local pilot. See the client-request section of README.md for suppression and deletion behaviour, the two-second browser refresh window, residual privacy risks, and rollout questions.
