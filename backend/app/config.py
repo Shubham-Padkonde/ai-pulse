@@ -35,7 +35,8 @@ if AI_MODE == "live":
     if url.scheme != "https" and url.hostname not in {"localhost", "127.0.0.1", "::1"}:
         raise RuntimeError("Remote model endpoints require HTTPS")
 CORS_ORIGINS = os.getenv(
-    "CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+    "CORS_ORIGINS",
+    os.getenv("RENDER_EXTERNAL_URL", "http://localhost:5173,http://127.0.0.1:5173"),
 ).split(",")
 TOKEN_HOURS = 1
 STATIC_DIR = os.getenv("STATIC_DIR", "")
