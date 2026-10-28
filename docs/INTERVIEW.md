@@ -46,6 +46,8 @@ Be precise about readiness: the local pilot and deterministic failure paths are 
 
 **Is suppression anonymity?** No. It removes direct small-group outputs and the simple total-subtraction attack. Repeated snapshots and outside knowledge remain risks. Describe the limit openly.
 
+**What did the final code review catch?** Two privacy gaps: a risk count could expose a small complement, and an Unassigned row appeared only after someone completed an assessment. Five flagged out of six reveals the remaining one, so exact counts now require five people on both sides. The Unassigned row now depends on membership. Regression tests failed before the fixes and passed afterwards; the interface says Protected rather than claiming a 0–4 range.
+
 **How immediate is deletion?** After the deletion transaction commits, new API reads exclude the assessment. Existing browser views normally update within two seconds plus network time. The system cannot take back screenshots.
 
 **Can an admin read an employee’s plan?** No API endpoint grants that capability. The personal route derives the owner from the authenticated membership; an action from someone else returns 404.

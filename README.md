@@ -62,9 +62,9 @@ The questionnaire itself is retained. The product remains a self-reported diagno
 
 - Completed **people** are counted, with one current assessment each.
 - Each person's average has equal weight in the department average, regardless of how many role-specific questions they answered.
-- All four risk categories appear in a fixed order for visible teams. Counts from zero through four share the same protected band.
+- All four risk categories appear in a fixed order for visible teams. An exact count requires at least five people with the signal and five without it; otherwise it says **Protected**. Zero and all-person counts are also protected. This prevents the department total from revealing a small complementary group.
 - There is no company-wide score, participant total or risk total from which hidden departments could be reconstructed by subtraction.
-- Department names remain visible; their protected numbers do not.
+- Department names remain visible; their protected numbers do not. The Unassigned row depends on organizational membership, so completing or deleting the first assessment cannot reveal participation by making that row appear or disappear.
 
 **Deletion:** The employee can delete the current organization’s diagnostic or all their organizational diagnostics. Account and membership records remain so they can sign in again. Responses, the assessment and its plan are removed together, including legacy answers.
 
@@ -136,7 +136,7 @@ python scripts/check.py
 
 The suite uses isolated temporary databases and never resets the local demo database. It checks backend contracts, interface behaviour and a production frontend build.
 
-At the verified local build: **68 backend tests and 6 interface tests pass**. Browser checks cover the actual local app; see [verification notes](docs/VERIFICATION.md) for scope and limits. A clean Windows clone and GitHub Actions on Linux also passed the setup and checks.
+At the verified local build: **76 backend tests and 7 interface tests pass**. Browser checks cover the actual local app; see [verification notes](docs/VERIFICATION.md) for scope and limits. A clean Windows clone and GitHub Actions on Linux also passed the setup and checks.
 
 Dependency checks:
 

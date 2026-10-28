@@ -33,6 +33,35 @@ test("protected department never displays a numeric score or count", async () =>
   expect(screen.queryByText("0 / 5")).not.toBeInTheDocument();
 });
 
+test("a suppressed risk count is protected without claiming a numeric range", async () => {
+  api.mockResolvedValue({
+    ai_mode: "mock",
+    updated_at: "2026-10-28T10:00:00Z",
+    departments: [
+      {
+        department: "Support",
+        protected: false,
+        responded: 6,
+        average_score: 3,
+        level: "Developing",
+        risks: [
+          {
+            key: "unreviewed_output",
+            label: "AI output used without review",
+            people: null,
+          },
+        ],
+      },
+    ],
+  });
+  render(<Dashboard />);
+  expect(
+    await screen.findByText("AI output used without review"),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Protected")).toBeInTheDocument();
+  expect(screen.queryByText("0–4 people")).not.toBeInTheDocument();
+});
+
 test("assessment requires an answer before advancing and saves the complete payload", async () => {
   const user = userEvent.setup(),
     onDone = vi.fn();

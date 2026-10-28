@@ -33,7 +33,8 @@ export default function Privacy({ onDeleted }) {
           <h2>What leadership sees</h2>
           <p>
             Group results appear only for departments with at least five
-            completed assessments. Small groups and rare risk counts are
+            completed assessments. Exact risk counts require at least five
+            people with the signal and five without it. Other counts are
             protected.
           </p>
           <p>

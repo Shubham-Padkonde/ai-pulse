@@ -33,12 +33,18 @@ def publish(departments):
             continue
         avg = round(sum(p["average"] for p in people) / len(people), 2)
         counts = Counter(flag for person in people for flag in set(person["flags"]))
-        # All four categories remain in a fixed order; zero and small counts look identical.
+        # A published total also reveals its complement. Protect both sides,
+        # including zero/all, and keep every category present in a fixed order.
         risks = [
             {
                 "key": flag,
                 "label": RISK_LABELS[flag],
-                "people": counts[flag] if counts[flag] >= MIN_GROUP_SIZE else None,
+                "people": (
+                    counts[flag]
+                    if counts[flag] >= MIN_GROUP_SIZE
+                    and len(people) - counts[flag] >= MIN_GROUP_SIZE
+                    else None
+                ),
             }
             for flag in ALLOWED_FLAGS
         ]

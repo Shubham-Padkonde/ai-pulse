@@ -8,8 +8,8 @@ The final local check command is **python scripts/check.py**.
 
 | Check | Result |
 | --- | --- |
-| Backend tests | 68 passed |
-| React interface tests in jsdom | 6 passed |
+| Backend tests | 76 passed |
+| React interface tests in jsdom | 7 passed |
 | Production frontend build | Passed |
 | Python runtime dependency audit | No known vulnerabilities reported |
 | npm dependency audit | No known vulnerabilities reported |
@@ -27,6 +27,8 @@ The backend test runner currently emits a Starlette warning that its httpx-based
 - Employee permissions remain narrower than admin permissions, including for a user in two companies.
 - Empty, partial, duplicate, wrong-role and invalid-choice submissions cannot replace existing valid data.
 - Counts reflect completed people. Four people are protected; five qualify. Repeated submission does not add another person.
+- An exact risk count requires at least five flagged and five unflagged people; zero and all-person counts also remain protected. Duplicate flags on one person never inflate counts.
+- A first completed assessment or last deletion does not change whether the Unassigned row appears.
 - Deletion removes answers and activities, changes dashboard eligibility and is safe to repeat.
 - Deletion during model scoring cannot resurrect the deleted assessment.
 - A stale scoring worker cannot overwrite a newer lease, and a stale membership revision cannot replace a newer submission.
@@ -75,3 +77,11 @@ The original rubric over-labelled confidential sharing when only customer record
 These are the same ten author-written cases used during development. The final 10/10 is a calibration result, not unbiased accuracy evidence. No employee data or API key is included in the saved result files.
 
 The browser journey also passed against the real provider: a newly created synthetic employee in a separate local test workspace answered all six questions. The saved report showed a 3.33 average, the written answer received 4/5 with a relevant review-based explanation, and only the expected policy-awareness risk appeared. The private plan selected the policy-learning activity. The report persisted after reload with live mode, Gemini 3.5 Flash-Lite and rubric v3 recorded. Existing synthetic reports stayed labelled as samples.
+
+## Final review and regression checks — 28 October 2026
+
+A separate Codex source review of the changes from the inherited baseline identified two privacy defects that the existing suite had missed. Publishing five flagged people out of six exposed a one-person complement. Also, the Unassigned row appeared only after its first completed assessment, revealing participation in a small group.
+
+New regression cases reproduced both defects before the fixes. Exact risk counts now require five people on both sides; otherwise the UI says Protected without claiming a numeric range. The Unassigned row comes from organization memberships independently of completion. Tests cover first completion and deletion, complement boundaries, zero/all counts, deduplication and the displayed wording. The full suite and production build passed afterwards. The review was an AI-assisted source review, not an independent security certification; repeated snapshots and outside knowledge remain privacy limitations.
+
+The running dashboard was rechecked in the browser, including the protected Unassigned row and revised risk explanation. A restart check found the saved local environment still selected mock mode and Gemini 3.8 Flash. Only its non-secret mode/model settings were corrected. After restarting, the API and browser confirmed live mode, and a fresh synthetic provider request returned score 4 with only the expected policy-awareness flag. No credentials were added to Git.

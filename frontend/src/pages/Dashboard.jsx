@@ -192,15 +192,15 @@ export default function Dashboard() {
                   <div className="risk-item" key={r.key}>
                     <span>{r.label}</span>
                     <Badge tone={r.people === null ? "neutral" : "amber"}>
-                      {r.people === null ? "0–4" : r.people} people
+                      {r.people === null ? "Protected" : `${r.people} people`}
                     </Badge>
                   </div>
                 ))}
               </div>
               <p className="small-note">
                 <Icon icon={LockKeyhole} size={14} />
-                Zero and small counts share the same band. A protected count
-                does not mean no risk exists.
+                Exact counts require at least five people with the signal and
+                five without it. Protected does not mean no risk exists.
               </p>
             </>
           ) : (
@@ -208,8 +208,8 @@ export default function Dashboard() {
               <Icon icon={ShieldCheck} size={35} />
               <h3>Privacy comes first</h3>
               <p>
-                Risk signals become available when a team has at least five
-                completed assessments.
+                Team results require five completed assessments. Exact risk
+                counts also protect people without each signal.
               </p>
             </div>
           )}

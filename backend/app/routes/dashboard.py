@@ -48,6 +48,14 @@ def org_dashboard(
     for row in rows:
         by_assessment.setdefault(row.assessment_id, []).append(row)
     groups = {d.id: {"name": d.name, "people": []} for d in departments}
+    # Row presence must depend on membership, never on who has answered.
+    has_unassigned_members = any(
+        department_id not in groups
+        for (department_id,) in db.query(models.Membership.department_id)
+        .filter_by(org_id=m.org_id)
+        .distinct()
+        .all()
+    )
     groups[None] = {"name": "Unassigned", "people": []}
     for assessment, member in completed:
         answers = by_assessment.get(assessment.id, [])
@@ -66,7 +74,7 @@ def org_dashboard(
                 "flags": [f for r in answers for f in (r.flags or [])],
             }
         )
-    if not groups[None]["people"]:
+    if not has_unassigned_members:
         del groups[None]
     return {
         "organization": m.org.name,
@@ -80,5 +88,5 @@ def org_dashboard(
             for p in g["people"]
         ),
         "updated_at": now(),
-        "privacy_note": "Only completed assessments contribute. Small groups and rare risk counts are protected. No company total is published.",
+        "privacy_note": "Only completed assessments contribute. Small groups are protected. Exact risk counts require at least five people with the signal and five without. No company total is published.",
     }

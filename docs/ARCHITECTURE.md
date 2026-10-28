@@ -14,7 +14,7 @@ flowchart LR
   Parse --> Pending[Pending with retry]
   Complete --> Personal[Owner only report and plan]
   Complete --> Group[Per person average]
-  Group --> Privacy[Suppress small groups and rare counts]
+  Group --> Privacy[Protect small groups and risk complements]
   Privacy --> Admin[Organization admin dashboard]
 ~~~
 
@@ -46,7 +46,9 @@ The publication function receives people, each with an average and risk-label se
 
 Each participant has equal weight. This matters because an engineering lead answers more questions than a junior support employee. Averaging all answer rows would give some people more influence.
 
-Risk categories are fixed, and each flagged person counts once per category. Zero and values below five are indistinguishable. No company total is exposed. This blocks the simple total-minus-visible-teams reconstruction, but not every inference using outside information or snapshots over time.
+Risk categories are fixed, and each flagged person counts once per category. An exact risk count requires at least five flagged and five unflagged people. Otherwise the count is null, including zero and all-person counts. For example, publishing five flagged people out of six would reveal a one-person complement, so the count stays protected. No company total is exposed. These rules block simple subtraction attacks, but not every inference using outside information or snapshots over time.
+
+The Unassigned row is included whenever organization memberships lack a valid department, independently of completed assessments. Its presence cannot reveal a first submission or last deletion. Named department rows likewise come from the department roster, not participation.
 
 ## Deletion
 

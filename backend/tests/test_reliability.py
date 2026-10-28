@@ -70,6 +70,24 @@ def test_five_to_four_after_deletion_and_return_to_five(client):
     assert support(client, admin)["responded"] == 5
 
 
+def test_unassigned_row_does_not_reveal_first_completion_or_deletion(client):
+    admin = employee(client, "asha@northwind.test")
+
+    def unassigned():
+        groups = client.get("/dashboard", headers=admin).json()["departments"]
+        return next((g for g in groups if g["department"] == "Unassigned"), None)
+
+    before = unassigned()
+    assert before is not None and before["protected"] is True
+    response = client.post(
+        "/diagnostic/submit", headers=admin, json=payload(client, admin)
+    )
+    assert response.status_code == 200 and response.json()["status"] == "completed"
+    assert unassigned() == before
+    assert client.delete("/reports/me", headers=admin).status_code == 200
+    assert unassigned() == before
+
+
 def test_deletion_cascades_actions_and_does_not_touch_other_people(client):
     headers = employee(client)
     before = report(client, headers)
@@ -266,11 +284,36 @@ def test_risk_count_counts_people_once():
         {"average": 3, "flags": ["unreviewed_output", "unreviewed_output"]}
         for _ in range(5)
     ]
+    rows.extend({"average": 3, "flags": []} for _ in range(5))
     group = publish([{"name": "Team", "people": rows}])[0]
     assert (
         next(x for x in group["risks"] if x["key"] == "unreviewed_output")["people"]
         == 5
     )
+
+
+@pytest.mark.parametrize(
+    "size, flagged, expected",
+    [
+        (6, 5, None),
+        (6, 6, None),
+        (9, 5, None),
+        (10, 5, 5),
+        (10, 6, None),
+        (10, 0, None),
+        (11, 6, 6),
+    ],
+)
+def test_risk_counts_protect_both_flagged_and_unflagged_people(size, flagged, expected):
+    rows = [
+        {"average": 3, "flags": ["unreviewed_output"] if i < flagged else []}
+        for i in range(size)
+    ]
+    group = publish([{"name": "Team", "people": rows}])[0]
+    assert group["responded"] == size
+    assert next(r for r in group["risks"] if r["key"] == "unreviewed_output")[
+        "people"
+    ] == expected
 
 
 @pytest.mark.parametrize(
