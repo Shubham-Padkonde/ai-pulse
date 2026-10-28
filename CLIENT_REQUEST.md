@@ -10,4 +10,4 @@
 >
 > Thanks, Northwind HR
 
-Implemented for the local pilot. See the client-request section of README.md for suppression and deletion behaviour, the two-second browser refresh window, residual privacy risks, and rollout questions.
+Implemented for the pilot. See [issues and fixes](README.md#issues-found-and-fixes) for the summary, [architecture](docs/ARCHITECTURE.md) for privacy and deletion behaviour, and [rollout notes](docs/ROLLOUT.md) for open client questions.
