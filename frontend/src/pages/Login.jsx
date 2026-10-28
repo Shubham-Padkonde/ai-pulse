@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { api, setToken } from "../api";
 import { Brand, Icon, ErrorMessage, Badge } from "../components";
+import PublicDemoNotice from "../PublicDemoNotice";
 export default function Login({ onDone, notice }) {
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
@@ -88,6 +89,7 @@ export default function Login({ onDone, notice }) {
       </section>
       <section className="login-form-area">
         <div className="login-form-wrap">
+          <PublicDemoNotice />
           <Badge tone="green">AI MATURITY WORKSPACE</Badge>
           <h2>Welcome to AI Pulse</h2>
           <p className="subtitle">Sign in to your organization's workspace.</p>

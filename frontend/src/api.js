@@ -1,4 +1,5 @@
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// An explicitly empty URL uses the website's own origin in the hosted build.
+const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 export const getToken = () => sessionStorage.getItem("pulse-token");
 export function setToken(token) {
   if (token) sessionStorage.setItem("pulse-token", token);

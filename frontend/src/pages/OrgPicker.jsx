@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowRight, Building2, LogOut } from "lucide-react";
 import { Brand, Icon, Badge, ErrorMessage } from "../components";
+import PublicDemoNotice from "../PublicDemoNotice";
 export default function OrgPicker({ session, onPick, busy, error, onLogout }) {
   return (
     <div className="org-page">
@@ -12,6 +13,7 @@ export default function OrgPicker({ session, onPick, busy, error, onLogout }) {
         </button>
       </header>
       <div className="org-content">
+        <PublicDemoNotice />
         <p className="eyebrow">ONE ACCOUNT. SEPARATE WORKSPACES.</p>
         <h1>Where are we working today?</h1>
         <p className="subtitle">

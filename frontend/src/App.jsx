@@ -20,6 +20,7 @@ import Diagnostic from "./pages/Diagnostic";
 import Report from "./pages/Report";
 import Plan from "./pages/Plan";
 import Privacy from "./pages/Privacy";
+import PublicDemoNotice from "./PublicDemoNotice";
 
 const labels = {
   overview: "Team overview",
@@ -277,6 +278,7 @@ export default function App() {
           </div>
         </header>
         <main id="main" className="main" key={org.org_id}>
+          <PublicDemoNotice />
           {notice && (
             <div role="status" className="notice">
               {notice}

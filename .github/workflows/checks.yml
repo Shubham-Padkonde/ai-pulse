@@ -17,3 +17,41 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: python scripts/setup.py
       - run: python scripts/check.py
+  hosted-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t ai-pulse-hosted .
+      - name: Start isolated hosted demo
+        run: >-
+          docker run -d --name pulse-smoke -p 127.0.0.1:18000:8000
+          -e SECRET_KEY=ci-only-disposable-secret-never-deploy-123456
+          -e DATABASE_URL=sqlite:////data/aipulse.db
+          -e AI_MODE=mock -e SEED_DEMO=true
+          --mount type=volume,source=pulse-ci,target=/data ai-pulse-hosted
+      - name: Verify hosted UI and API
+        run: |
+          python - <<'PY'
+          import json, time, urllib.request
+          base = 'http://127.0.0.1:18000'
+          for attempt in range(45):
+              try:
+                  with urllib.request.urlopen(base + '/health', timeout=2) as r:
+                      assert json.load(r)['status'] == 'ok'
+                  break
+              except (OSError, AssertionError):
+                  if attempt == 44:
+                      raise
+                  time.sleep(2)
+          with urllib.request.urlopen(base, timeout=5) as r:
+              assert b'AI Pulse' in r.read()
+          request = urllib.request.Request(base + '/auth/login',
+              data=json.dumps({'email': 'new@northwind.test', 'password': 'pulse123'}).encode(),
+              headers={'Content-Type': 'application/json'})
+          with urllib.request.urlopen(request, timeout=5) as r:
+              assert json.load(r)['token']
+          print('Hosted container: UI, health, migrations, seed and login passed.')
+          PY
+      - name: Container diagnostics
+        if: failure()
+        run: docker logs pulse-smoke

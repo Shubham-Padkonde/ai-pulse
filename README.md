@@ -4,7 +4,7 @@ A role-aware AI habits assessment with private employee reports, protected team 
 
 [Repository](https://github.com/Shubham-Padkonde/ai-pulse) · [Automated checks](https://github.com/Shubham-Padkonde/ai-pulse/actions/workflows/checks.yml)
 
-This extends the inherited FastAPI/React application and retains its Git history. It is ready for a local, synthetic-data client demonstration. Real employee rollout still needs the deployment and model-validation work described below.
+This extends the inherited FastAPI/React application and retains its Git history. It supports a local synthetic-data demonstration and a single-service hosted reviewer demo with persistent storage. Real employee rollout still needs operational hardening and model validation. [Hosting and VS Code guide](docs/DEPLOYMENT.md).
 
 ## Run locally
 
@@ -27,7 +27,7 @@ The generated **backend/.env**, database and installed dependencies stay outside
 
 ### Synthetic demo accounts
 
-All demo passwords are **pulse123**. These accounts are deliberately public fixtures, suitable only for a local demo.
+All demo passwords are **pulse123**. These accounts are deliberately public fixtures, suitable only for fictional demo data. On a shared public deployment, other visitors using the same account can view, change or delete its answers and plan.
 
 | Account | Perspective |
 | --- | --- |

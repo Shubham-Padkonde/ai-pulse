@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 from urllib.parse import urlparse
+
 from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,5 +32,6 @@ CORS_ORIGINS = os.getenv(
     "CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
 ).split(",")
 TOKEN_HOURS = 1
+STATIC_DIR = os.getenv("STATIC_DIR", "")
 MIN_GROUP_SIZE = 5
 PROMPT_VERSION = "pulse-rubric-v3"

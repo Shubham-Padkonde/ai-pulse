@@ -1,9 +1,11 @@
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
-from .routes import auth_routes, diagnostic, reports, dashboard
+from fastapi.staticfiles import StaticFiles
+
 from . import config
+from .routes import auth_routes, dashboard, diagnostic, reports
 
 app = FastAPI(title="AI Pulse API", version="1.0.0")
 app.add_middleware(
@@ -73,3 +75,9 @@ app.include_router(dashboard.router)
 @app.get("/health")
 def health():
     return {"status": "ok", "ai_mode": config.AI_MODE}
+
+
+# API routes must precede this mount. Only the built frontend is served, never
+# the backend directory containing configuration or the persistent database.
+if config.STATIC_DIR:
+    app.mount("/", StaticFiles(directory=config.STATIC_DIR, html=True), name="web")

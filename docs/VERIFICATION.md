@@ -8,7 +8,7 @@ The final local check command is **python scripts/check.py**.
 
 | Check | Result |
 | --- | --- |
-| Backend tests | 78 passed |
+| Backend tests | 80 passed |
 | React interface tests in jsdom | 10 passed |
 | Production frontend build | Passed |
 | Python runtime dependency audit | No known vulnerabilities reported |
@@ -99,3 +99,21 @@ Browser verification confirmed the rehearsal on port 5174 with five completed Su
 The fallback activity explanation was made neutral so a frequent user is not incorrectly described as occasional. The explanation guide now traces an actual six-answer score, maps claims to tests and supplies a timed no-AI coding/debugging rehearsal. The full local suite and frontend production build passed after these changes. Docker is installed but its engine was not running; container execution remains unverified.
 
 A separate Codex source review of the recovery and rehearsal changes completed with no additional actionable P0–P2 findings. It inspected supplied source context and did not execute the application. This result applies to those changes; it is not a whole-system or production security certification.
+
+## Hosted package preparation — 28 October 2026
+
+The root image now builds and serves the frontend from the API's origin, while
+database storage is configured separately on a persistent volume. New integration
+checks run hosted preparation twice against a disposable SQLite file, confirm a
+saved change survives, verify login and protected API responses with the static
+mount enabled, and check that private file paths return 404. Missing explicit
+storage configuration is rejected. All 80 backend tests, 10 interface tests and
+the frontend build passed locally.
+
+The production frontend was also built with the public-demo notice and an empty
+API base, then served locally from the hosted startup command. Browser sign-in,
+organization selection and the saved personal report worked through that one
+origin. The ordinary live app runs as a VS Code task on ports 5173/8000.
+The new hosted-image CI job builds and smoke-tests the actual Linux container;
+its result and the external deployment must be checked before claiming hosting
+has succeeded.
