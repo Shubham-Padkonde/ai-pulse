@@ -130,6 +130,8 @@ Live evaluation makes ten bounded synthetic requests; provider charges may apply
 
 ## Verification
 
+A subsequent check used **eight fresh synthetic cases**, with expectations frozen before one run and no rubric changes or retries. All eight returned valid output, the expected score and the exact risk set, including a quoted instruction and four simultaneous risk signals. [The cases and results](docs/evaluations/gemini-flash-lite-fresh-v3.json) are included. This adds evidence beyond the tuned cases, but remains a small author-written check rather than independent validation.
+
 ~~~sh
 python scripts/check.py
 ~~~

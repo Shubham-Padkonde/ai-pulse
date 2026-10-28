@@ -60,7 +60,7 @@ A passing API test is not a browser test. A mocked provider is not a real model 
 
 There is no independent live-model semantic accuracy measurement, concurrency load benchmark, production deployment test, backup-restore exercise, or container execution result. The live development checks below must not be presented as a held-out accuracy benchmark.
 
-The included GitHub workflow ran the same setup and check commands successfully on Linux: [verified run](https://github.com/Shubham-Padkonde/ai-pulse/actions/runs/40649645631).
+The included GitHub workflow ran the same setup and check commands successfully on Linux after the privacy fixes: [verified run](https://github.com/Shubham-Padkonde/ai-pulse/actions/runs/40660723243).
 
 ## Live Gemini development checks — 28 October 2026
 
@@ -75,6 +75,8 @@ The private local key authenticated successfully. Gemini 3.8 Flash timed out and
 The original rubric over-labelled confidential sharing when only customer records were described, and unreviewed output when an answer explicitly said it was read. The revised rubric treats each risk separately. The second run scored a regular, checked workflow too low; v3 makes that boundary explicit. The final request uses low reasoning effort, temperature 0 and a 2,048-token limit. This reduces sampling variation but does not guarantee deterministic results.
 
 These are the same ten author-written cases used during development. The final 10/10 is a calibration result, not unbiased accuracy evidence. No employee data or API key is included in the saved result files.
+
+A later run used eight fresh synthetic cases with expected results frozen before calling the model. The rubric remained v3, with no retries or subsequent tuning. All eight produced valid output, matched their expected scores and matched the exact risk sets. They cover no use, occasional reviewed use, regular unchecked use, risk negation, an advanced workflow, a quoted instruction, internal-only disclosure and four simultaneous risks. [Saved evidence](evaluations/gemini-flash-lite-fresh-v3.json) includes the cases, expectations, model explanations, input hash and freeze timestamp. This is a small author-written holdout check, not independent or domain-validated accuracy.
 
 The browser journey also passed against the real provider: a newly created synthetic employee in a separate local test workspace answered all six questions. The saved report showed a 3.33 average, the written answer received 4/5 with a relevant review-based explanation, and only the expected policy-awareness risk appeared. The private plan selected the policy-learning activity. The report persisted after reload with live mode, Gemini 3.5 Flash-Lite and rubric v3 recorded. Existing synthetic reports stayed labelled as samples.
 
