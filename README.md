@@ -2,6 +2,8 @@
 
 A role-aware AI habits assessment with private employee reports, protected team insights, and a **private one-week improvement plan**.
 
+[Repository](https://github.com/Shubham-Padkonde/ai-pulse) · [Automated checks](https://github.com/Shubham-Padkonde/ai-pulse/actions/workflows/checks.yml)
+
 This extends the inherited FastAPI/React application and retains its Git history. It is ready for a local, synthetic-data client demonstration. Real employee rollout still needs the deployment and model-validation work described below.
 
 ![AI Pulse dashboard](docs/screenshots/dashboard-desktop.jpg)
@@ -134,7 +136,7 @@ python scripts/check.py
 
 The suite uses isolated temporary databases and never resets the local demo database. It checks backend contracts, interface behaviour and a production frontend build.
 
-At the verified local build: **66 backend tests and 6 interface tests pass**. Browser checks cover the actual local app; see [verification notes](docs/VERIFICATION.md) for scope and limits. GitHub Actions runs the same setup and checks.
+At the verified local build: **66 backend tests and 6 interface tests pass**. Browser checks cover the actual local app; see [verification notes](docs/VERIFICATION.md) for scope and limits. A clean Windows clone and GitHub Actions on Linux also passed the setup and checks.
 
 Dependency checks:
 

@@ -16,6 +16,8 @@ The final local check command is **python scripts/check.py**.
 | Fresh database migration and repeat upgrade | Passed |
 | Upgrade from a legacy database while retaining its answer | Passed |
 | Live evaluation dry run | Lists ten cases; makes no network calls |
+| Fresh-clone setup with a new environment and demo database | Passed; all tests and production build also passed |
+| GitHub Actions on Ubuntu, Python 3.13 and Node 24 | Passed |
 
 The backend test runner currently emits a Starlette warning that its httpx-based test client will be replaced. Tests pass; a test-client dependency migration is deferred.
 
@@ -44,9 +46,9 @@ The local app was checked through the in-app Chromium browser at desktop and pho
 - employee report and plan, saved completion after page reload, unchanged report score;
 - mobile navigation and page width;
 - deletion dialog begins with its destructive button disabled;
-- the first-time assessment flow through all six questions and submission; its completed report was then confirmed through the API.
+- the first-time assessment flow through all six questions and submission; its completed report was confirmed in the API and in the browser after signing out and in again.
 
-Browser access was disabled in Work settings before the final multi-company visual check. Ravi’s role switch is covered by API tests, but that final UI sequence was not completed.
+The multi-company browser check passed: Ravi sees the Bluepeak admin dashboard, then loses the leadership navigation when switching back to Northwind as an employee.
 
 Screenshots in this directory show synthetic data. Browser deletion was not used to erase the main demonstration fixture; the isolated API tests verify the actual deletion and five-to-four boundary.
 
@@ -56,4 +58,4 @@ A passing API test is not a browser test. A mocked provider is not a real model 
 
 No live model credentials were available. There is no measured live-model semantic accuracy, concurrency load benchmark, production deployment test, backup-restore exercise, or container execution result.
 
-The included GitHub workflow runs the same setup and check commands; its actual result should be read from the repository Actions page.
+The included GitHub workflow ran the same setup and check commands successfully on Linux: [verified run](https://github.com/Shubham-Padkonde/ai-pulse/actions/runs/40649645631).
