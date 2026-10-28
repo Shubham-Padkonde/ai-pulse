@@ -4,3 +4,16 @@ __pycache__/
 *.pyc
 *.db
 .pytest_cache/
+.venv/
+.env
+.env.*
+!.env.example
+*.db-*
+coverage/
+playwright-report/
+test-results/
+.coverage
+*.log
+
+.ruff_cache/
+work/

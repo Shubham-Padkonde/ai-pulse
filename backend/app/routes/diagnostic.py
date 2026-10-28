@@ -1,55 +1,65 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
-
 from ..db import get_db
-from .. import models
 from ..auth import current_membership
-from ..services.questions import questions_for, load_questions
-from ..services.scoring import score_open_answer
+from ..services.questions import questions_for
+from ..services import assessments
+from ..services.rate_limit import rate_limit
 
 router = APIRouter(prefix="/diagnostic", tags=["diagnostic"])
 
 
 class AnswerIn(BaseModel):
-    question_id: str
-    answer: str
+    model_config = ConfigDict(extra="forbid")
+    question_id: str = Field(min_length=1, max_length=40)
+    answer: str = Field(min_length=1, max_length=2000)
 
 
 class SubmitIn(BaseModel):
-    answers: list[AnswerIn]
+    model_config = ConfigDict(extra="forbid")
+    answers: list[AnswerIn] = Field(min_length=1, max_length=30)
 
 
 @router.get("/questions")
-def get_questions(m: models.Membership = Depends(current_membership)):
-    qs = questions_for(m.job_role, m.seniority)
-    # don't leak scoring points to the client
+def get_questions(m=Depends(current_membership)):
     return [
-        {k: v for k, v in q.items() if k != "points"} | (
-            {"options": [o["text"] for o in q["options"]]} if q["type"] == "mcq" else {}
-        )
-        for q in qs
+        {
+            "id": q["id"],
+            "type": q["type"],
+            "text": q["text"],
+            "options": [o["text"] for o in q.get("options", [])],
+        }
+        for q in questions_for(m.job_role, m.seniority)
     ]
 
 
 @router.post("/submit")
-def submit(body: SubmitIn, m: models.Membership = Depends(current_membership), db: Session = Depends(get_db)):
-    bank = {q["id"]: q for q in load_questions()}
-    for a in body.answers:
-        q = bank.get(a.question_id)
-        if not q:
-            raise HTTPException(400, f"Unknown question {a.question_id}")
-        resp = models.Response(membership_id=m.id, question_id=q["id"], answer=a.answer)
-        if q["type"] == "mcq":
-            option = next((o for o in q["options"] if o["text"] == a.answer), None)
-            if option is None:
-                raise HTTPException(400, f"Invalid option for {q['id']}")
-            resp.score = option["points"]
-        else:
-            result = score_open_answer(q["text"], a.answer)
-            resp.score = result["score"]
-            resp.reason = result["reason"]
-            resp.flags = result["flags"]
-        db.add(resp)
-    db.commit()
-    return {"saved": len(body.answers)}
+def submit(
+    body: SubmitIn, m=Depends(current_membership), db: Session = Depends(get_db)
+):
+    rate_limit("score:" + str(m.user_id))
+    assessment_id, created = assessments.save_submission(db, m, body.answers)
+    if created:
+        assessments.score_saved(db, assessment_id, m.id)
+    db.expire_all()
+    saved = assessments.current(db, m.id)
+    if not saved or saved.id != assessment_id:
+        raise HTTPException(
+            409, "This assessment was replaced or deleted in another request."
+        )
+    return {"assessment_id": saved.id, "status": saved.status, "reused": not created}
+
+
+@router.post("/retry")
+def retry(m=Depends(current_membership), db: Session = Depends(get_db)):
+    rate_limit("score:" + str(m.user_id))
+    saved = assessments.current(db, m.id)
+    if not saved:
+        raise HTTPException(404, "No assessment to retry.")
+    assessments.score_saved(db, saved.id, m.id)
+    db.expire_all()
+    saved = assessments.current(db, m.id)
+    if not saved:
+        raise HTTPException(404, "This assessment was deleted.")
+    return {"status": saved.status}

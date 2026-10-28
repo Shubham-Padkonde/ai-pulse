@@ -7,7 +7,13 @@ def ids(qs):
 
 def test_everyone_gets_common_questions():
     got = ids(questions_for("sales", "junior"))
-    assert {"common-freq", "common-policy", "common-data", "common-review", "common-open"} <= got
+    assert {
+        "common-freq",
+        "common-policy",
+        "common-data",
+        "common-review",
+        "common-open",
+    } <= got
 
 
 def test_junior_engineer_does_not_get_senior_questions():
