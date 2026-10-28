@@ -44,7 +44,7 @@ CATALOG = {
         "title": "Try one small, reviewed workflow",
         "minutes": 15,
         "source": "common-freq",
-        "why": "A small, low-risk experiment can help turn occasional use into a deliberate habit.",
+        "why": "A small, reviewed experiment helps you decide where AI is useful in your work.",
         "steps": [
             "Choose a routine task and create fictional input with no private information.",
             "Use an approved AI tool to make a first draft.",

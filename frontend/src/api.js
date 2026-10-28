@@ -23,12 +23,15 @@ export async function api(path, options = {}) {
       setToken(null);
       window.dispatchEvent(new Event("pulse-session-expired"));
     }
-    if (!response.ok)
-      throw new Error(
+    if (!response.ok) {
+      const error = new Error(
         typeof data.detail === "string"
           ? data.detail
           : "The request could not be completed.",
       );
+      error.status = response.status;
+      throw error;
+    }
     return data;
   } catch (error) {
     if (error.name === "AbortError")

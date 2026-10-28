@@ -159,6 +159,7 @@ export function DeleteDialog({ open, onClose, scope, onDeleted }) {
   return (
     <dialog
       ref={ref}
+      aria-labelledby="delete-dialog-title"
       onCancel={(e) => {
         e.preventDefault();
         if (!busy) onClose();
@@ -169,7 +170,7 @@ export function DeleteDialog({ open, onClose, scope, onDeleted }) {
         <span className="empty-icon danger">
           <Icon icon={LockKeyhole} size={26} />
         </span>
-        <h2>Delete your diagnostic data?</h2>
+        <h2 id="delete-dialog-title">Delete your diagnostic data?</h2>
         <p>
           This permanently removes your answers, report and improvement plan{" "}
           {scope === "all"

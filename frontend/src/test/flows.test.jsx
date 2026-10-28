@@ -158,6 +158,9 @@ test("delete requires explicit confirmation and sends the chosen scope", async (
   render(
     <DeleteDialog open scope="all" onClose={() => {}} onDeleted={deleted} />,
   );
+  expect(
+    screen.getByRole("dialog", { name: "Delete your diagnostic data?" }),
+  ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Delete my data" })).toBeDisabled();
   await user.type(screen.getByLabelText("Type DELETE to confirm"), "DELETE");
   await user.click(screen.getByRole("button", { name: "Delete my data" }));

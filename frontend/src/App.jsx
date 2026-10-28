@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { api, getToken, setToken } from "./api";
-import { Brand, Icon, Badge, Loading } from "./components";
+import { Brand, Icon, Badge, Loading, ErrorMessage } from "./components";
 import Login from "./pages/Login";
 import OrgPicker from "./pages/OrgPicker";
 import Dashboard from "./pages/Dashboard";
@@ -32,6 +32,8 @@ export default function App() {
   const [session, setSession] = useState(null),
     [org, setOrg] = useState(null),
     [loading, setLoading] = useState(true);
+  const [startupError, setStartupError] = useState(""),
+    [startupAttempt, setStartupAttempt] = useState(0);
   const [page, setPage] = useState("report"),
     [notice, setNotice] = useState(""),
     [mobile, setMobile] = useState(false),
@@ -42,8 +44,12 @@ export default function App() {
     setOrg(null);
     setSession(null);
     setNotice(message);
+    setStartupError("");
   }
   useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setStartupError("");
     const expired = () =>
       signout("Your session has ended. Please sign in again.");
     window.addEventListener("pulse-session-expired", expired);
@@ -53,6 +59,7 @@ export default function App() {
     }
     api("/auth/me")
       .then(async (s) => {
+        if (!active) return;
         const previous = s.organizations.find(
           (o) => String(o.org_id) === sessionStorage.getItem("pulse-org"),
         );
@@ -61,16 +68,26 @@ export default function App() {
             method: "POST",
             body: JSON.stringify({ org_id: previous.org_id }),
           });
+          if (!active) return;
           setToken(selected.token);
           setOrg(previous);
           setPage(previous.role === "admin" ? "overview" : "report");
         }
         setSession(s);
       })
-      .catch((e) => signout(e.message))
-      .finally(() => setLoading(false));
-    return () => window.removeEventListener("pulse-session-expired", expired);
-  }, []);
+      .catch((e) => {
+        if (!active) return;
+        if (e.status === 401 || e.status === 403) signout(e.message);
+        else setStartupError(e.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+      window.removeEventListener("pulse-session-expired", expired);
+    };
+  }, [startupAttempt]);
   function navigate(next) {
     setPage(next);
     setMobile(false);
@@ -100,6 +117,28 @@ export default function App() {
       <div className="boot">
         <Brand />
         <Loading />
+      </div>
+    );
+  if (startupError)
+    return (
+      <div className="org-page">
+        <header>
+          <Brand />
+          <button className="button quiet" onClick={() => signout()}>
+            Sign out
+          </button>
+        </header>
+        <div className="org-content">
+          <h1>Reconnect to your workspace</h1>
+          <p className="subtitle">
+            We couldn't load your workspace. Try again when the connection is
+            back.
+          </p>
+          <ErrorMessage
+            message={startupError}
+            retry={() => setStartupAttempt((attempt) => attempt + 1)}
+          />
+        </div>
       </div>
     );
   if (!session)
