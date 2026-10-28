@@ -70,6 +70,28 @@ def test_five_to_four_after_deletion_and_return_to_five(client):
     assert support(client, admin)["responded"] == 5
 
 
+@pytest.mark.parametrize("scope", ["current", "all"])
+def test_admin_personal_deletion_preserves_other_employees(client, scope):
+    admin = employee(client, "asha@northwind.test")
+    priya = employee(client)
+    before = report(client, priya)
+    before_support = support(client, admin)
+    assert before["status"] == "completed" and before["actions"]
+    submitted = client.post(
+        "/diagnostic/submit", headers=admin, json=payload(client, admin)
+    )
+    assert submitted.status_code == 200
+    assert submitted.json()["status"] == "completed"
+
+    deleted = client.delete(f"/reports/me?scope={scope}", headers=admin)
+
+    assert deleted.status_code == 200
+    assert deleted.json()["answers_deleted"] > 0
+    assert report(client, admin)["status"] == "not_started"
+    assert report(client, priya) == before
+    assert support(client, admin) == before_support
+
+
 def test_unassigned_row_does_not_reveal_first_completion_or_deletion(client):
     admin = employee(client, "asha@northwind.test")
 

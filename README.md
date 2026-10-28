@@ -45,7 +45,7 @@ Setup installs dependencies, generates a private signing key and preserves exist
 | Model failures could produce unreliable results | Validate structured output; save answers as pending and offer retry when scoring fails. |
 | Weak credentials and unsafe setup | Salted password hashes, generated secrets, request limits and migrations that preserve data. |
 
-For the **client request**, I chose suppression rather than merging unrelated departments. No company total exposes hidden groups by subtraction. Deletion takes effect in database-backed results immediately; open dashboards normally refresh within two seconds.
+For the **client request**, I chose suppression rather than merging unrelated departments. No company total exposes hidden groups by subtraction. Deletion affects only the signed-in person, including admins. It takes effect in database-backed results immediately; open dashboards normally refresh within two seconds.
 
 Before rollout, I would confirm whether deletion includes accounts, whether department names may stay visible, and the required provider/backup retention policy. [Design details](docs/ARCHITECTURE.md).
 
@@ -59,7 +59,7 @@ A score alone leaves employees asking what to do next. The plan selects up to th
 python scripts/check.py
 ```
 
-**80 backend tests, 10 interface tests and the production build passed.** CI also covers PostgreSQL and container startup. Browser checks covered live scoring, saved progress, company switching and deletion. [Evidence and scope](docs/VERIFICATION.md).
+**82 backend tests, 10 interface tests and the production build passed.** CI also covers PostgreSQL and container startup. Browser checks covered live scoring, saved progress, company switching and deletion. [Evidence and scope](docs/VERIFICATION.md).
 
 This is a single-worker pilot. SSO, managed backups, load testing and independent model validation remain deferred. Scores describe self-reported habits, not verified job performance. The free hosted database expires after 30 days unless upgraded. [Rollout notes](docs/ROLLOUT.md).
 

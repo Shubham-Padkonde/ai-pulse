@@ -76,8 +76,9 @@ export default function Privacy({ onDeleted }) {
           <div>
             <h2>Delete my diagnostic data</h2>
             <p>
-              Remove your answers, report and improvement plan. Keep your
-              account.
+              Remove only your own answers, report and improvement plan. Your
+              account remains. Other employees' data stays unchanged, including
+              when you are an organization admin.
             </p>
           </div>
           <span className="metric-icon blush">
@@ -85,7 +86,7 @@ export default function Privacy({ onDeleted }) {
           </span>
         </div>
         <fieldset>
-          <legend>Choose where to delete your data</legend>
+          <legend>Choose which of your assessments to delete</legend>
           <label className="scope-option">
             <input
               type="radio"
@@ -94,9 +95,10 @@ export default function Privacy({ onDeleted }) {
               onChange={() => setScope("current")}
             />
             <span>
-              <strong>This organization</strong>
+              <strong>My data in this organization</strong>
               <small>
-                Your diagnostic data in other organizations remains.
+                Delete only your diagnostic here. Your data in other
+                organizations remains.
               </small>
             </span>
           </label>
@@ -108,7 +110,7 @@ export default function Privacy({ onDeleted }) {
               onChange={() => setScope("all")}
             />
             <span>
-              <strong>All my organizations</strong>
+              <strong>My data across all my organizations</strong>
               <small>
                 Remove every assessment and plan belonging to your account.
               </small>

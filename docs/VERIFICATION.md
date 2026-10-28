@@ -168,3 +168,21 @@ not a promise that the shared account will retain that exact state.
 Free hosting has concrete limits: an idle website can take about a minute to
 wake, and the free database expires 30 days after creation with no managed
 backups. This is a time-limited demonstration, not a production deployment claim.
+
+## Personal deletion scope clarification - 29 October 2026
+
+A reported concern was that deleting from an admin account should remove another
+employee's report. The existing endpoint intentionally deletes only assessments
+owned by the authenticated user, including when that user is an admin. Both the
+current-company and all-company choices are personal scopes, not a company reset.
+
+Two regression cases now exercise both scopes with a completed admin assessment.
+They confirm the admin's report is removed while Priya's full report, activities
+and Support's published results remain unchanged. The deletion page and confirmation
+now state this ownership boundary explicitly. No deletion permission was expanded.
+
+The full local suite passed: 82 backend tests, 10 interface tests and the production
+frontend build. One PostgreSQL test is skipped in the default local run. Read-only
+API checks found Priya's public report absent while her independent Desktop and
+rehearsal reports remained. A fresh browser-login check was blocked by automatic
+approval review, so no new browser execution is claimed for this wording change.

@@ -179,6 +179,10 @@ export function DeleteDialog({ open, onClose, scope, onDeleted }) {
           . Your account remains, and you can take a new assessment.
         </p>
         <p>
+          This affects only your own diagnostic data, even if you are an admin.
+          Other employees' assessments stay unchanged.
+        </p>
+        <p>
           Future dashboard results will exclude this assessment. We cannot erase
           screenshots someone previously saved.
         </p>
